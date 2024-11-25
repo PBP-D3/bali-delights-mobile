@@ -134,22 +134,26 @@ Penjual di aplikasi Bali Delights berfungsi sebagai penyedia produk suvenir yang
 
 ## V. Alur Pengintegrasian dengan _Web Service_
 
+1. Web Server
+   - Django dijalankan di server dengan menggunakan perintah manage.py, yang mengatur server dan aplikasi Django. Ini menghubungkan ke berbagai komponen dalam aplikasi, termasuk model, serializer, dan views.
 
-1. **Membuat Endpoint JSON**
-
+2. Views.py
    - Memodifikasi projek django agar tiap fungsi dalam views dapat melakukan panggilan secara http request (dengan json sebagai response-nya)
 
-2. **Membuat Model Objek dalam Flutter**
-
+3. Model & DB
+   - Data yang dibutuhkan aplikasi Flutter akan diambil dari database menggunakan model Django.
+     
+4. Serializer
+   - Django menggunakan serializer untuk mengubah data model menjadi format JSON yang dapat digunakan oleh aplikasi. Serializer ini mengubah data dari model Django ke format yang dapat dipahami oleh aplikasi Flutter, dan juga sebaliknya.
+     
+5. Flutter
+   - Menggunakan `provider` dan pbp_django_auth` untuk dapat mengakses internet dan implementasi cookies.
+   - Flutter mengirimkan permintaan (request) ke server Django melalui internet. Aplikasi Flutter (Android atau iOS) mengirimkan permintaan ke URL Django `http://muhammad-azzam31-balidelights.pbp.cs.ui.ac.id` dalam format JSON.
    - Mentranslasikan model yang sebelumya sudah dibuat dalam django ke dalam model dart
-
-3. **Implementasi Auth / Cookies**
-
-   - Menggunakan `provider` dan pbp_django_auth` yang sudah disediakan tim asdos PBP.
-
-3. **HTTP Requests**
-
+     
+6. Request dan Response
    - App Flutter dapat memanggil endpoint dari django dengan menggunakan custom fetch dan cookie sebagai tanda pengenal
-
+   - Django memproses permintaan dari aplikasi tersebut di server dan memberikan respons JSON kembali ke aplikasi Flutter. Respons ini kemudian akan ditampilkan hasilnya di aplikasi.
+     
 
 
