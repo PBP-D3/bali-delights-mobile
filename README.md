@@ -44,44 +44,44 @@ Selain itu, aplikasi ini memiliki fitur **e-commerce**, di mana pengguna dapat m
 
 Dengan **Bali Delights**, pengalaman mendapatkan suvenir dari Bali menjadi lebih mudah, autentik, dan memuaskan. Aplikasi ini tidak hanya menjembatani para wisatawan dengan produk-produk khas Bali, tetapi juga mempererat hubungan antara pengrajin lokal dengan dunia internasional, membawa keindahan Pulau Dewata ke panggung global.
 
-## III. Daftar Modul yang Akan Dikembangkan dalam Aplikasi Bali Delights
+## III. Daftar Modul / Pembagian Tugas Pengembangan Aplikasi
 
-1. **Modul Toko**
+1. **Modul Toko / Pascal** 
 
    - Pengelolaan data toko (tambah, edit, hapus).
    - Menampilkan informasi toko (nama, lokasi, deskripsi, jam buka).
    - Fitur pencarian dan filter untuk menemukan toko berdasarkan kategori atau lokasi.
    - Fitur rekomendasi toko.
 
-2. **Modul Produk**
+2. **Modul Produk / Adi**
 
    - Pengelolaan data produk (tambah, edit, hapus).
    - Menampilkan detail produk (nama, deskripsi, harga, foto, kategori).
    - Fitur pencarian dan filter untuk menemukan produk berdasarkan kategori, harga, atau popularitas.
    - Fitur stok produk untuk mengelola ketersediaan barang.
 
-3. **Modul Review**
+3. **Modul Review / Edmond**
 
    - Pengguna dapat memberikan ulasan dan rating untuk produk dan toko.
    - Menampilkan ulasan pengguna (komentar, rating, tanggal).
    - Fitur moderasi untuk mengelola dan menyetujui ulasan yang masuk.
    - Statistik ulasan untuk setiap produk dan toko.
 
-4. **Modul Keranjang**
+4. **Modul Keranjang / Azzam**
 
    - Menambahkan produk ke dalam keranjang belanja.
    - Mengelola isi keranjang (tambah, hapus, ubah jumlah produk).
    - Menghitung total biaya dan menampilkan rincian pesanan.
    - Fitur checkout untuk memproses pembayaran.
 
-5. **Modul Pengguna**
+5. **Modul Pengguna / Azzam**
 
    - Pendaftaran dan autentikasi pengguna (login, logout, registrasi).
    - Profil pengguna (pengaturan akun, preferensi, dan informasi pribadi).
    - Riwayat pembelian dan transaksi.
    - Pengelolaan wishlist atau daftar favorit.
 
-6. **Modul Chat dengan Penjual**:
+6. **Modul Chat dengan Penjual / Karol**:
    - Membuat chat baru dengan penjual dari halaman produk atau toko.
    - Pembeli bisa chat dengan penjual untuk menanyakan mengenai produk dan pengiriman.
    - Chat akan memiliki sejumlah default messages yang dapat dikirimkan langsung untuk mempermudah pembeli.
@@ -89,11 +89,7 @@ Dengan **Bali Delights**, pengalaman mendapatkan suvenir dari Bali menjadi lebih
 
 Dengan pengembangan modul-modul di atas, aplikasi Bali Delights akan memberikan pengalaman pengguna yang optimal, memfasilitasi penjual dalam mengelola produk mereka, dan memberikan analisis yang berguna untuk pengambilan keputusan.
 
-## IV. Sumber Dataset
-
-Kami memutuskan untuk mengambil initial dataset untuk produk suvenir dengan melakukan web-scrapping dari e-commerce yang sudah ada, seperti Shopee dan Tokopedia.
-
-## V. Role Pengguna
+## IV. Role Pengguna
 
 ### Pelanggan
 
@@ -135,11 +131,25 @@ Penjual di aplikasi Bali Delights berfungsi sebagai penyedia produk suvenir yang
 
    - Penjual dapat melihat ulasan yang diberikan oleh pelanggan dan merespons feedback untuk meningkatkan layanan dan kualitas produk.
 
-4. **Analytics**
-   - Penjual dapat melihat total penjualan mereka serta chart penjualan berdasarkan produk/kategori.
 
-## VI. Tautan Deployment
+## V. Alur Pengintegrasian dengan _Web Service_
 
-Github: https://github.com/PBP-D3/bali-delights
 
-Deployment: [http://pbp.cs.ui.ac.id/muhammad.azzam31/balidelights](http://muhammad-azzam31-balidelights.pbp.cs.ui.ac.id)
+1. **Membuat Endpoint JSON**
+
+   - Memodifikasi projek django agar tiap fungsi dalam views dapat melakukan panggilan secara http request (dengan json sebagai response-nya)
+
+2. **Membuat Model Objek dalam Flutter**
+
+   - Mentranslasikan model yang sebelumya sudah dibuat dalam django ke dalam model dart
+
+3. **Implementasi Auth / Cookies**
+
+   - Menggunakan `provider` dan pbp_django_auth` yang sudah disediakan tim asdos PBP.
+
+3. **HTTP Requests**
+
+   - App Flutter dapat memanggil endpoint dari django dengan menggunakan custom fetch dan cookie sebagai tanda pengenal
+
+
+
