@@ -134,6 +134,8 @@ Penjual di aplikasi Bali Delights berfungsi sebagai penyedia produk suvenir yang
 
 ## V. Alur Pengintegrasian dengan _Web Service_
 
+![Diagram](https://github.com/user-attachments/assets/57baaede-ff40-4903-ad0a-e05aca1956c3)
+
 1. Web Server
    - Django dijalankan di server dengan menggunakan perintah manage.py, yang mengatur server dan aplikasi Django. Ini menghubungkan ke berbagai komponen dalam aplikasi, termasuk model, serializer, dan views.
 
