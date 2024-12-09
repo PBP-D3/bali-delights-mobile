@@ -101,6 +101,29 @@ class NavBar extends StatelessWidget {
               title: const Text('Logout'),
               onTap: () => _showLogoutDialog(context, request),
             ),
+            // Add this inside the if (request.loggedIn) ... block
+            ListTile(
+              leading: const Icon(Icons.shopping_cart),
+              title: const Text('Cart'),
+              onTap: () => Navigator.pushNamed(context, '/cart'),
+            ),
+            // Inside the if (request.loggedIn) block in NavBar class
+            ListTile(
+              leading: const Icon(Icons.chat),
+              title: const Text('Chat'),
+              onTap: () {
+                Navigator.pop(context); // Close drawer
+                Navigator.pushNamed(context, '/chat');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.store),
+              title: const Text('Store'),
+              onTap: () {
+                Navigator.pop(context); // Close drawer
+                Navigator.pushNamed(context, '/store');
+              },
+            ),
           ],
         ],
       ),
