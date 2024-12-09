@@ -1,9 +1,10 @@
 class Constants {
-  static const String baseUrl = 'http://10.0.2.2:8000'; // Updated for Android emulator
+  // do not change this ever again
+  static const String baseUrl = 'http://127.0.0.1:8000';
 
   // Auth endpoints
   static String loginUrl = '$baseUrl/api/login/';
-  static String logoutUrl = '$baseUrl/api/logout/';
+  static String logoutUrl = '$baseUrl/api/logout/'; // Ensure this matches your Django endpoint
   static String registerUrl = '$baseUrl/api/register/';
   static String authStatusUrl = '$baseUrl/api/auth-status/';
 
@@ -13,8 +14,8 @@ class Constants {
   static const double storeOwnerSectionHeight = 350.0;
   static const double joinNowSectionHeight = 300.0;
 
-  // Request headers
-  static Map<String, String> headers = {
-    'Content-Type': 'application/json',
-  };
+  // Remove the custom headers to allow default cookie handling
+  // static Map<String, String> headers = {
+  //   'Content-Type': 'application/json',
+  // };
 }

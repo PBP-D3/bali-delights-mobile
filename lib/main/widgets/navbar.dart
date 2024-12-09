@@ -3,7 +3,6 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert'; // Add this import
 import '../../constants.dart';
-import '../../main/models/user_model.dart'; // Add this import
 
 class NavBar extends StatelessWidget {
   const NavBar({super.key});
@@ -23,24 +22,22 @@ class NavBar extends StatelessWidget {
             ),
             FilledButton(
               onPressed: () async {
-                final response = await request.post(
-                  Constants.logoutUrl,
-                  {},
-                );
-                if (response['status'] == 'success' && context.mounted) {
+                final response = await request.logout(Constants.logoutUrl);
+
+                if (response['status'] == true && context.mounted) {
                   Navigator.pop(context); // Close dialog
                   Navigator.pop(context); // Close drawer
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Successfully logged out!"),
+                    SnackBar(
+                      content: Text(response['message']),
                       backgroundColor: Colors.green,
                     ),
                   );
-                  Navigator.pushReplacementNamed(context, '/');
+                  Navigator.pushReplacementNamed(context, '/login');
                 } else if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(response['message'] ?? 'Logout failed'),
+                      content: Text(response['message'] ?? "Logout failed"),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -86,9 +83,8 @@ class NavBar extends StatelessWidget {
             // Options for logged in users
             ListTile(
               leading: const Icon(Icons.person),
-              title: const Text('Profile'), // User info section
-              subtitle: const Text('Welcome back!'),
-              enabled: false,
+              title: Text('Profile'),
+              subtitle: Text('Welcome, ${request.jsonData['username']}'),
             ),
             const Divider(),
             ListTile(
