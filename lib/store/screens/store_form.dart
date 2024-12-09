@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:bali_delights_mobile/store/model/store.dart';
 import 'package:bali_delights_mobile/store/screens/store_page.dart';
-
 
 class StoreFormPage extends StatefulWidget {
   const StoreFormPage({super.key});
@@ -18,11 +16,10 @@ class _StoreFormPageState extends State<StoreFormPage> {
   final _formKey = GlobalKey<FormState>();
 
   String _name = "";
+  String _location = "";
   String _description = "";
-  int _price = 0;
-  int _stock = 0;
-  String _image = "";
-  String _category = "";
+  String _photoUpload = "";
+  String _photo = "";
 
   @override
   Widget build(BuildContext context) {
@@ -46,20 +43,45 @@ class _StoreFormPageState extends State<StoreFormPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
                   decoration: InputDecoration(
-                    hintText: "Product Name",
-                    labelText: "Product Name",
+                    hintText: "Store Name",
+                    labelText: "Store Name",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (String? value) {
+                  onChanged: (value) {
                     setState(() {
-                      _name = value!;
+                      _name = value;
                     });
                   },
-                  validator: (String? value) {
+                  validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Name tidak boleh kosong!";
+                      return "Store Name cannot be empty!";
+                    }
+                    return null;
+                  },
+                ),
+              ),
+
+              // Input Location
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    hintText: "Location",
+                    labelText: "Location",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _location = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Location cannot be empty!";
                     }
                     return null;
                   },
@@ -77,128 +99,64 @@ class _StoreFormPageState extends State<StoreFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (String? value) {
+                  onChanged: (value) {
                     setState(() {
-                      _description = value!;
+                      _description = value;
                     });
                   },
-                  validator: (String? value) {
+                  validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Description tidak boleh kosong!";
+                      return "Description cannot be empty!";
                     }
                     return null;
                   },
                 ),
               ),
 
-              // Input Price
+              // Input Photo Upload URL
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
                   decoration: InputDecoration(
-                    hintText: "Product Price",
-                    labelText: "Product Price",
+                    hintText: "Photo Upload URL",
+                    labelText: "Photo Upload URL",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (String? value) {
+                  onChanged: (value) {
                     setState(() {
-                      _price = int.tryParse(value!) ?? 0;
+                      _photoUpload = value;
                     });
                   },
-                  validator: (String? value) {
+                  validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Price tidak boleh kosong!";
-                    }
-                    final parsedValue = int.tryParse(value);
-                    if (parsedValue == null) {
-                      return "Price harus berupa angka!";
-                    }
-                    if (parsedValue < 0) {
-                      return "Price tidak boleh negatif!";
+                      return "Photo Upload URL cannot be empty!";
                     }
                     return null;
                   },
                 ),
               ),
 
-              // Input Stock
+              // Input Photo URL
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
                   decoration: InputDecoration(
-                    hintText: "Stock",
-                    labelText: "Stock",
+                    hintText: "Photo URL",
+                    labelText: "Photo URL",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
-                  onChanged: (String? value) {
+                  onChanged: (value) {
                     setState(() {
-                      _stock = int.tryParse(value!) ?? 0;
+                      _photo = value;
                     });
                   },
-                  validator: (String? value) {
+                  validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Stock tidak boleh kosong!";
-                    }
-                    final parsedValue = int.tryParse(value);
-                    if (parsedValue == null) {
-                      return "Stock harus berupa angka!";
-                    }
-                    if (parsedValue < 0) {
-                      return "Stock tidak boleh negatif!";
-                    }
-                    return null;
-                  },
-                ),
-              ),
-
-              // Input Image URL
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Image URL",
-                    labelText: "Image URL",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _image = value!;
-                    });
-                  },
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return "Image URL tidak boleh kosong!";
-                    }
-                    return null;
-                  },
-                ),
-              ),
-
-              // Input Category
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Category",
-                    labelText: "Category",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _category = value!;
-                    });
-                  },
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return "Category tidak boleh kosong!";
+                      return "Photo URL cannot be empty!";
                     }
                     return null;
                   },
@@ -220,28 +178,28 @@ class _StoreFormPageState extends State<StoreFormPage> {
                           "http://localhost:8000/store/register-store-flutter/",
                           jsonEncode({
                             'name': _name,
-                            'price': _price.toString(),
+                            'location': _location,
                             'description': _description,
-                            'stock': _stock.toString(),
-                            'image': _image,
-                            'category': _category,
+                            'photo_upload': _photoUpload,
+                            'photo': _photo,
                           }),
                         );
                         if (context.mounted) {
                           if (response['status'] == 'success') {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text("Store baru berhasil disimpan!"),
+                                content: Text("New store successfully saved!"),
                               ),
                             );
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const StorePage()),
+                              MaterialPageRoute(
+                                  builder: (context) => const StorePage()),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text("Terdapat kesalahan, silakan coba lagi."),
+                                content: Text("An error occurred. Try again."),
                               ),
                             );
                           }
