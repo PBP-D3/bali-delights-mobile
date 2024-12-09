@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:bali_delights_mobile/reviews/screens/list_reviews_product.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+import 'constants.dart';
+import 'main/screens/login.dart';
+import 'main/screens/register.dart';
+import 'main/widgets/navbar.dart';
+// import 'main/models/user_model.dart'; // Remove this import if not needed
+import 'main/screens/home.dart'; // Ensure you have a HomePage widget
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    Provider(
+      create: (_) => CookieRequest(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -11,68 +23,170 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Bali Delights',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFBD9F7E),
+          primary: const Color(0xFFBD9F7E),
+        ),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      routes: {
+        '/': (context) => const HomePage(),
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class HomePage extends StatelessWidget {
+  // Ensure HomePage is defined
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: const Text('Bali Delights'),
       ),
-      body: Center(
+      drawer: const NavBar(),
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+          children: [
+            // Hero Section with increased height
+            Container(
+              height: Constants.heroSectionHeight,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFFEAE0D5),
+                    const Color(0xFFBD9F7E),
+                  ],
+                ),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    'Bali Delights',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Discover the best local products from the heart of Bali. From handmade crafts to exotic snacks, we bring the island\'s charm right to your doorstep.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+
+            // Products Section with increased height
+            Container(
+              height: Constants.productsSectionHeight,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  const Text(
+                    'Explore Over 100 Products',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Discover the best of Bali with our curated selection of local products.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ReviewScreen(productId: 2)), // Pass the productId here
-                );
-              },
-              child: const Text('Go to Reviews'),
+
+            // Store Owner Section with increased height
+            Container(
+              height: Constants.storeOwnerSectionHeight,
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFEAE0D5), Colors.white],
+                ),
+              ),
+              child: const Column(
+                children: [
+                  Text(
+                    'Become a Store Owner and Start Earning!',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('• Turn your passion into profit'),
+                      Text('• Easily manage your products'),
+                      Text('• Dedicated chat channels for each user'),
+                      Text('• And many more benefits!'),
+                    ],
+                  ),
+                ],
+              ),
             ),
+
+            // Join Now Section - Only show if not logged in
+            if (!request.loggedIn)
+              Container(
+                height: Constants.joinNowSectionHeight,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Join the Bali Delights Community',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Sign up to enjoy a personalized shopping experience and exclusive offers.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () =>
+                              Navigator.pushNamed(context, '/login'),
+                          child: const Text('Login'),
+                        ),
+                        const SizedBox(width: 10),
+                        FilledButton(
+                          onPressed: () =>
+                              Navigator.pushNamed(context, '/register'),
+                          child: const Text('Register'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
