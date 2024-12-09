@@ -1,32 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:bali_delights_mobile/reviews/models/reviews.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:bali_delights_mobile/reviews/models/reviews.dart';
 import 'package:bali_delights_mobile/constants.dart';
 
-// ReviewScreen widget
-class ReviewScreen extends StatefulWidget {
-  final int productId;
-
-  ReviewScreen({required this.productId});
-
+class UserReviewScreen extends StatefulWidget {
   @override
-  _ReviewScreenState createState() => _ReviewScreenState();
+  _UserReviewScreenState createState() => _UserReviewScreenState();
 }
 
-class _ReviewScreenState extends State<ReviewScreen> {
+class _UserReviewScreenState extends State<UserReviewScreen> {
   late Future<List<Review>> futureReviews;
   final CookieRequest _cookieRequest = CookieRequest();
 
   @override
   void initState() {
     super.initState();
-    futureReviews = fetchReviews(widget.productId);
+    futureReviews = fetchUserReviews();
   }
 
-  Future<List<Review>> fetchReviews(int productId) async {
+  Future<List<Review>> fetchUserReviews() async {
     await _cookieRequest.init();
-    final response = await _cookieRequest.get('${Constants.baseUrl}/reviews/$productId/json');
+    print(context.read<CookieRequest>().jsonData);
+    print('Fetching user reviews');
+    final response = await _cookieRequest.get('${Constants.baseUrl}/reviews/my-review/json');
+    print(response);
+    if (response is Map && response.containsKey('detail') && response['detail'] == 'Authentication credentials were not provided.') {
+      // Handle not authenticated
+      print('User is not authenticated');
+      return [];
+    }
 
     List jsonResponse = response;
     return jsonResponse.map((review) => Review.fromJson(review)).toList();
@@ -36,7 +39,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product Reviews'),
+        title: Text('My Reviews'),
       ),
       body: FutureBuilder<List<Review>>(
         future: futureReviews,
