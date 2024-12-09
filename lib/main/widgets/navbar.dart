@@ -88,15 +88,6 @@ class NavBar extends StatelessWidget {
             ),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.reviews),
-              title: const Text('My Reviews'),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => UserReviewScreen()),
-              ),
-            ),
-            const Divider(),
-            ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
               onTap: () => _showLogoutDialog(context, request),
@@ -123,6 +114,14 @@ class NavBar extends StatelessWidget {
                 Navigator.pop(context); // Close drawer
                 Navigator.pushNamed(context, '/store');
               },
+            ),
+            ListTile(
+              leading: const Icon(Icons.reviews),
+              title: const Text('My Reviews'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserReviewScreen()),
+              ),
             ),
           ],
         ],
