@@ -16,7 +16,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   TextEditingController _searchController = TextEditingController();
 
   // Simulasi role, ganti sesuai kebutuhan (misalnya: 'shop_owner' atau 'user')
-  String userRole = 'user'; 
+  String userRole = 'user';
 
   @override
   void initState() {
@@ -67,6 +67,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('Messages'),
+      ),
       backgroundColor: Colors.grey[200],
       body: SafeArea(
         child: Center(
@@ -98,7 +105,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     if (userRole != "shop_owner")
                       Row(
                         children: [
-                          Text("New Chat", style: TextStyle(color: Colors.black, fontSize: 16)),
+                          Text("New Chat",
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 16)),
                           SizedBox(width: 8),
                           GestureDetector(
                             onTap: openAddChatModal,
@@ -110,7 +119,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 shape: BoxShape.circle,
                               ),
                               alignment: Alignment.center,
-                              child: Text("+", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                              child: Text("+",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold)),
                             ),
                           )
                         ],
@@ -129,7 +141,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue, width: 2),
                     ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                 ),
 
@@ -162,7 +175,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => ChatDetailScreen(chatId: chat.id),
+                                        builder: (_) =>
+                                            ChatDetailScreen(chatId: chat.id),
                                       ),
                                     );
                                   },
@@ -174,11 +188,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                       children: [
                                         if (userRole != 'shop_owner')
                                           ClipRRect(
-                                            borderRadius: BorderRadius.circular(50),
+                                            borderRadius:
+                                                BorderRadius.circular(50),
                                             child: Image.network(
                                               'https://via.placeholder.com/40', // Ganti dengan chat.store.photo_url jika tersedia
                                               width: 40,
@@ -186,12 +202,16 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                               fit: BoxFit.cover,
                                             ),
                                           ),
-                                        if (userRole != 'shop_owner') SizedBox(width: 12),
+                                        if (userRole != 'shop_owner')
+                                          SizedBox(width: 12),
                                         Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              userRole == 'shop_owner' ? "CustomerUsername" : chat.storeName,
+                                              userRole == 'shop_owner'
+                                                  ? "CustomerUsername"
+                                                  : chat.storeName,
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
@@ -203,7 +223,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                               userRole == "shop_owner"
                                                   ? "Message from Customer at ${chat.createdAt}"
                                                   : "Last message at ${chat.createdAt}",
-                                              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.grey[600]),
                                             ),
                                           ],
                                         ),
