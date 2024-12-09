@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'models/chat.dart';
-import 'models/message.dart';
+import 'chats/models/chat.dart';
+import 'chats/models/message.dart';
 
 class ApiService {
   static const String baseUrl = 'http://localhost:8000';

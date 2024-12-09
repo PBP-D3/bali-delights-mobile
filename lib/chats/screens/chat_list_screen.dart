@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../api_service.dart';
-import '../../models/chat.dart';
+import '../models/chat.dart';
 import 'chat_detail_screen.dart';
 import 'delete_chat_modal.dart';
 import 'add_chat_modal.dart';

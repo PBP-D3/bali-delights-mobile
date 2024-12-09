@@ -27,7 +27,7 @@ class _CartScreenState extends State<CartScreen> {
 
     if (!context.mounted) return;
 
-    if (response['success']) {
+    if (response['status'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Order placed successfully!')),
       );
