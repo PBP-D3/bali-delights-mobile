@@ -1,3 +1,4 @@
+import 'package:bali_delights_mobile/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +8,7 @@ import 'package:bali_delights_mobile/store/screens/store_detail.dart';
 class AllStores extends StatefulWidget {
   final bool isMyStores; // Add the indicator argument
 
-  const AllStores({Key? key, required this.isMyStores}) : super(key: key);
+  const AllStores({super.key, required this.isMyStores});
 
   @override
   State<AllStores> createState() => _AllStoresState();
@@ -15,10 +16,9 @@ class AllStores extends StatefulWidget {
 
 class _AllStoresState extends State<AllStores> {
   Future<List<Store>> fetchStores(CookieRequest request) async {
-    // Fetch different endpoints based on the isMyStores flag
     final String endpoint = widget.isMyStores
-        ? 'http://localhost:8000/stores/owner_json/'
-        : 'http://localhost:8000/stores/json/';
+        ? '${Constants.baseUrl}/stores/owner_json/'
+        : '${Constants.baseUrl}/stores/json/';
 
     final response = await request.get(endpoint);
     var data = response;

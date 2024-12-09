@@ -33,7 +33,7 @@ class StorePage extends StatelessWidget {
               ),
             ];
           },
-          body: const TabBarView(
+          body: TabBarView(
             children: [
               // Tab 1: All Stores
               AllStores(isMyStores: false),

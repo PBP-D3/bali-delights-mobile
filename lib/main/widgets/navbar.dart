@@ -98,6 +98,12 @@ class NavBar extends StatelessWidget {
               title: const Text('Cart'),
               onTap: () => Navigator.pushNamed(context, '/cart'),
             ),
+
+            ListTile(
+              leading: const Icon(Icons.store),
+              title: const Text('Store'),
+              onTap: () => Navigator.pushNamed(context, '/stores'),
+            ),
           ],
         ],
       ),

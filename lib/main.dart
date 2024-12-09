@@ -1,3 +1,4 @@
+import 'package:bali_delights_mobile/store/screens/store_page.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/cart': (context) => const CartScreen(),
+        '/stores': (context) => const StorePage(),
       },
     );
   }
