@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-<<<<<<< Updated upstream
-=======
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'constants.dart';
@@ -10,7 +8,6 @@ import 'main/widgets/navbar.dart';
 // import cart from screen
 import 'package:bali_delights_mobile/carts/screens/carts.dart';
 // import 'main/screens/home.dart'; // Ensure you have a HomePage widget
->>>>>>> Stashed changes
 
 void main() {
   runApp(const MyApp());
@@ -43,16 +40,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-<<<<<<< Updated upstream
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-=======
       routes: {
         '/': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/cart': (context) => const CartScreen(),
       },
->>>>>>> Stashed changes
     );
   }
 }
