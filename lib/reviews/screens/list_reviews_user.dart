@@ -3,6 +3,8 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:bali_delights_mobile/reviews/models/reviews.dart';
 import 'package:bali_delights_mobile/constants.dart';
+import 'package:bali_delights_mobile/reviews/screens/edit_reviews.dart';
+import 'package:bali_delights_mobile/reviews/widgets/user_reviews_card.dart';
 
 class UserReviewScreen extends StatefulWidget {
   @override
@@ -35,6 +37,26 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
     return jsonResponse.map((review) => Review.fromJson(review)).toList();
   }
 
+  Future<void> deleteReview(int reviewId) async {
+    final response = await _cookieRequest.post('${Constants.baseUrl}/reviews/delete-review/$reviewId/', {});
+    if (response['success']) {
+      setState(() {
+        futureReviews = fetchUserReviews();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to delete review'),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
+  Future<void> refreshReviews() async {
+    setState(() {
+      futureReviews = fetchUserReviews();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +70,21 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
             return ListView.builder(
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
-                return ReviewCard(review: snapshot.data![index]);
+                return ReviewCard(
+                  review: snapshot.data![index],
+                  onDelete: deleteReview,
+                  onEdit: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditReviewScreen(review: snapshot.data![index]),
+                      ),
+                    );
+                    if (result == true) {
+                      refreshReviews();
+                    }
+                  },
+                );
               },
             );
           } else if (snapshot.hasError) {
@@ -61,45 +97,3 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
   }
 }
 
-// ReviewCard widget
-class ReviewCard extends StatelessWidget {
-  final Review review;
-
-  ReviewCard({required this.review});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(10),
-      child: Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              review.user.username,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            SizedBox(height: 5),
-            Text(
-              'Rating: ${review.rating} / 5',
-              style: TextStyle(color: Colors.yellow[700]),
-            ),
-            SizedBox(height: 5),
-            Text(review.comment),
-            SizedBox(height: 5),
-            Text(
-              'Likes: ${review.totalLikes}',
-              style: TextStyle(color: Colors.grey),
-            ),
-            SizedBox(height: 5),
-            Text(
-              'Reviewed on: ${review.createdAt.toLocal()}',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
