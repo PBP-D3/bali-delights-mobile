@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../api_service.dart';
-import '../models/message.dart';
+import '../../api_service.dart';
+import '../../models/message.dart';
 import 'edit_message_modal.dart';
 
 class ChatDetailScreen extends StatefulWidget {
