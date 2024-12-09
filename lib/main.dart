@@ -5,8 +5,9 @@ import 'constants.dart';
 import 'main/screens/login.dart';
 import 'main/screens/register.dart';
 import 'main/widgets/navbar.dart';
-// import 'main/models/user_model.dart'; // Remove this import if not needed
-import 'main/screens/home.dart'; // Ensure you have a HomePage widget
+// import cart from screen
+import 'package:bali_delights_mobile/carts/screens/carts.dart';
+// import 'main/screens/home.dart'; // Ensure you have a HomePage widget
 
 void main() {
   runApp(
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
+        '/cart': (context) => const CartScreen(),
       },
     );
   }
