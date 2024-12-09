@@ -9,6 +9,7 @@ import 'main/widgets/navbar.dart';
 import 'package:bali_delights_mobile/carts/screens/carts.dart';
 // import 'main/screens/home.dart'; // Ensure you have a HomePage widget
 import 'package:bali_delights_mobile/chats/screens/chat_list_screen.dart';
+import 'package:bali_delights_mobile/store/screens/store_page.dart';
 
 void main() {
   runApp(
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterPage(),
         '/cart': (context) => const CartScreen(),
         '/chat': (context) => ChatListScreen(), // Add this line
+        '/store': (context) => const StorePage(), // Add this line
       },
     );
   }

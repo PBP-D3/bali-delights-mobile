@@ -107,6 +107,14 @@ class NavBar extends StatelessWidget {
                 Navigator.pushNamed(context, '/chat');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.store),
+              title: const Text('Store'),
+              onTap: () {
+                Navigator.pop(context); // Close drawer
+                Navigator.pushNamed(context, '/store');
+              },
+            ),
           ],
         ],
       ),
