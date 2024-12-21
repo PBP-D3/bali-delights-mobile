@@ -1,4 +1,6 @@
+import 'package:bali_delights_mobile/constants.dart';
 import 'package:bali_delights_mobile/product/models/product.dart';
+import 'package:bali_delights_mobile/reviews/screens/list_reviews_product.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -21,8 +23,7 @@ class _ProductPageState extends State<ProductPage> {
   Future<void> fetchProducts() async {
     final request = context.read<CookieRequest>();
     try {
-      // Replace with your Django API endpoint
-      final response = await request.get('http://http://127.0.0.1:8000/api/products/');
+      final response = await request.get('${Constants.baseUrl}/api/products/');
 
       if (response['status'] == 'success') {
         setState(() {

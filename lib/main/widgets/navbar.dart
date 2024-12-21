@@ -1,3 +1,4 @@
+import 'package:bali_delights_mobile/product/screens/product_page.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
