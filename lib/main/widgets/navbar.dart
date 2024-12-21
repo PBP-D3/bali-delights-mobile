@@ -98,6 +98,11 @@ class NavBar extends StatelessWidget {
               title: const Text('Cart'),
               onTap: () => Navigator.pushNamed(context, '/cart'),
             ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Order History'),
+              onTap: () => Navigator.pushNamed(context, '/order-history'),
+            ),
             // Inside the if (request.loggedIn) block in NavBar class
             ListTile(
               leading: const Icon(Icons.chat),

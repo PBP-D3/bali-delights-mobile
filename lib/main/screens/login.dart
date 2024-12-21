@@ -1,8 +1,6 @@
-import 'package:bali_delights_mobile/main/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:bali_delights_mobile/main/screens/register.dart';
 import '../../constants.dart';
 
 void main() {
@@ -80,8 +78,8 @@ class _LoginPageState extends State<LoginPage> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12.0)),
                         ),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12.0, vertical: 8.0),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -102,8 +100,8 @@ class _LoginPageState extends State<LoginPage> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12.0)),
                         ),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12.0, vertical: 8.0),
                       ),
                       obscureText: true,
                       validator: (value) {
@@ -130,7 +128,8 @@ class _LoginPageState extends State<LoginPage> {
 
                           if (request.loggedIn) {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
                                 content: Text("Login berhasil"),
                                 backgroundColor: Colors.green,
                               ));
@@ -138,8 +137,10 @@ class _LoginPageState extends State<LoginPage> {
                             }
                           } else {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(response['message'] ?? 'Login gagal'),
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content:
+                                    Text(response['message'] ?? 'Login gagal'),
                                 backgroundColor: Colors.red,
                               ));
                             }
@@ -156,7 +157,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 36.0),
                     TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/register'),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/register'),
                       child: const Text('Don\'t have an account? Register'),
                     ),
                   ],
