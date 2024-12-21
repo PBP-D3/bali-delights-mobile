@@ -126,6 +126,20 @@ class _CartScreenState extends State<CartScreen> {
                     return Card(
                       margin: const EdgeInsets.all(8.0),
                       child: ListTile(
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.network(
+                            item['image'] ??
+                                "https://img.freepik.com/premium-vector/shop-vector-design-white-background_917213-257003.jpg?semt=ais_hybrid",
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.image_not_supported,
+                                  size: 50);
+                            },
+                          ),
+                        ),
                         title: Text(item['product_name']),
                         subtitle: Text('Price: \$${item['price']}'),
                         trailing: Row(

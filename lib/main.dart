@@ -10,6 +10,8 @@ import 'package:bali_delights_mobile/carts/screens/carts.dart';
 // import 'main/screens/home.dart'; // Ensure you have a HomePage widget
 import 'package:bali_delights_mobile/chats/screens/chat_list_screen.dart';
 import 'package:bali_delights_mobile/store/screens/store_page.dart';
+import 'package:bali_delights_mobile/carts/screens/order_history.dart';
+import 'package:bali_delights_mobile/carts/screens/order_receipt.dart';
 
 void main() {
   runApp(
@@ -39,8 +41,14 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/cart': (context) => const CartScreen(),
-        '/chat': (context) => ChatListScreen(), // Add this line
-        '/store': (context) => const StorePage(), // Add this line
+        '/order-history': (context) =>
+            const OrderHistoryScreen(), // Add this line
+        '/chat': (context) => ChatListScreen(),
+        '/store': (context) => const StorePage(),
+        '/order-receipt': (context) => OrderReceiptScreen(
+              orderId:
+                  (ModalRoute.of(context)?.settings.arguments as int?) ?? 0,
+            ),
       },
     );
   }
