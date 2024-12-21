@@ -65,7 +65,8 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   Future<TopReviewsResponse> fetchTopReviews() async {
-    final response = await http.get(Uri.parse('${Constants.baseUrl}/api/top-reviews'));
+    final response =
+        await http.get(Uri.parse('${Constants.baseUrl}/api/top-reviews'));
     if (response.statusCode == 200) {
       return TopReviewsResponse.fromJson(json.decode(response.body));
     } else {
@@ -89,27 +90,27 @@ class HomePage extends StatelessWidget {
             Container(
               height: Constants.heroSectionHeight,
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFFEAE0D5),
-                    const Color(0xFFBD9F7E),
+                    Color(0xFFEAE0D5),
+                    Color(0xFFBD9F7E),
                   ],
                 ),
               ),
-              child: Column(
+              child: const Column(
                 children: [
-                  const Text(
+                  Text(
                     'Bali Delights',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
+                  SizedBox(height: 10),
+                  Text(
                     'Discover the best local products from the heart of Bali. From handmade crafts to exotic snacks, we bring the island\'s charm right to your doorstep.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
@@ -140,14 +141,18 @@ class HomePage extends StatelessWidget {
                     future: fetchTopReviews(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
-                        return Center(child: Text('Failed to load top reviews'));
-                      } else if (!snapshot.hasData || snapshot.data!.reviews.isEmpty) {
-                        return Center(child: Text('No top reviews available'));
+                        return const Center(
+                            child: Text('Failed to load top reviews'));
+                      } else if (!snapshot.hasData ||
+                          snapshot.data!.reviews.isEmpty) {
+                        return const Center(
+                            child: Text('No top reviews available'));
                       } else {
-                        return Container(
-                          height: 300, // Adjusted height to fit the image and text
+                        return SizedBox(
+                          height:
+                              300, // Adjusted height to fit the image and text
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: snapshot.data!.reviews.length,
@@ -155,19 +160,24 @@ class HomePage extends StatelessWidget {
                               final review = snapshot.data!.reviews[index];
                               return Container(
                                 width: 300,
-                                margin: EdgeInsets.symmetric(horizontal: 10),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 child: Card(
                                   child: Padding(
                                     padding: const EdgeInsets.all(10.0),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         GestureDetector(
                                           onTap: () {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => ReviewScreen(productId: review.product.id),
+                                                builder: (context) =>
+                                                    ReviewScreen(
+                                                        productId:
+                                                            review.product.id),
                                               ),
                                             );
                                           },
@@ -177,41 +187,49 @@ class HomePage extends StatelessWidget {
                                             fit: BoxFit.cover,
                                           ),
                                         ),
-                                        SizedBox(height: 10),
+                                        const SizedBox(height: 10),
                                         GestureDetector(
                                           onTap: () {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => ReviewScreen(productId: review.product.id),
+                                                builder: (context) =>
+                                                    ReviewScreen(
+                                                        productId:
+                                                            review.product.id),
                                               ),
                                             );
                                           },
                                           child: Text(
                                             review.product.name,
-                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16),
                                           ),
                                         ),
-                                        SizedBox(height: 5),
+                                        const SizedBox(height: 5),
                                         Text(
                                           'Rating: ${review.rating} / 5',
-                                          style: TextStyle(color: Colors.yellow[700]),
+                                          style: TextStyle(
+                                              color: Colors.yellow[700]),
                                         ),
-                                        SizedBox(height: 5),
+                                        const SizedBox(height: 5),
                                         Text(
                                           review.comment,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        SizedBox(height: 5),
+                                        const SizedBox(height: 5),
                                         Text(
                                           'Likes: ${review.totalLikes}',
-                                          style: TextStyle(color: Colors.grey),
+                                          style: const TextStyle(
+                                              color: Colors.grey),
                                         ),
-                                        SizedBox(height: 5),
+                                        const SizedBox(height: 5),
                                         Text(
                                           'Reviewed by: ${review.user.username}',
-                                          style: TextStyle(color: Colors.grey),
+                                          style: const TextStyle(
+                                              color: Colors.grey),
                                         ),
                                       ],
                                     ),

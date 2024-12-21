@@ -83,7 +83,7 @@ class NavBar extends StatelessWidget {
             // Options for logged in users
             ListTile(
               leading: const Icon(Icons.person),
-              title: Text('Profile'),
+              title: const Text('Profile'),
               subtitle: Text('Welcome, ${request.jsonData['username']}'),
             ),
             const Divider(),
