@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import '../../constants.dart';
 import '../widgets/navbar.dart';
 
 class HomePage extends StatelessWidget {
@@ -23,13 +22,13 @@ class HomePage extends StatelessWidget {
             if (!request.loggedIn)
               // Show sections for guests
               Container(
-                // ...existing code...
-              ),
+                  // ...existing code...
+                  ),
             if (request.loggedIn)
               // Show sections for logged-in users
               Container(
-                // ...existing code...
-              ),
+                  // ...existing code...
+                  ),
           ],
         ),
       ),

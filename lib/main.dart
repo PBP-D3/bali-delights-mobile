@@ -74,27 +74,27 @@ class HomePage extends StatelessWidget {
             Container(
               height: Constants.heroSectionHeight,
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFFEAE0D5),
-                    const Color(0xFFBD9F7E),
+                    Color(0xFFEAE0D5),
+                    Color(0xFFBD9F7E),
                   ],
                 ),
               ),
-              child: Column(
+              child: const Column(
                 children: [
-                  const Text(
+                  Text(
                     'Bali Delights',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
+                  SizedBox(height: 10),
+                  Text(
                     'Discover the best local products from the heart of Bali. From handmade crafts to exotic snacks, we bring the island\'s charm right to your doorstep.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
@@ -107,17 +107,17 @@ class HomePage extends StatelessWidget {
             Container(
               height: Constants.productsSectionHeight,
               padding: const EdgeInsets.all(20),
-              child: Column(
+              child: const Column(
                 children: [
-                  const Text(
+                  Text(
                     'Explore Over 100 Products',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
+                  SizedBox(height: 10),
+                  Text(
                     'Discover the best of Bali with our curated selection of local products.',
                     textAlign: TextAlign.center,
                   ),
@@ -146,10 +146,10 @@ class HomePage extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text('• Turn your passion into profit'),
                       Text('• Easily manage your products'),
                       Text('• Dedicated chat channels for each user'),

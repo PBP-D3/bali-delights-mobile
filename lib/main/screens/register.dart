@@ -121,7 +121,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           if (_passwordController.text !=
                               _confirmPasswordController.text) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
+                              const SnackBar(
                                 content: Text("Passwords do not match."),
                                 backgroundColor: Colors.red,
                               ),

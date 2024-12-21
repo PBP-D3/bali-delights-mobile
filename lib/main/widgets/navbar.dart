@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'dart:convert'; // Add this import
 import '../../constants.dart';
 
 class NavBar extends StatelessWidget {
@@ -83,7 +82,7 @@ class NavBar extends StatelessWidget {
             // Options for logged in users
             ListTile(
               leading: const Icon(Icons.person),
-              title: Text('Profile'),
+              title: const Text('Profile'),
               subtitle: Text('Welcome, ${request.jsonData['username']}'),
             ),
             const Divider(),
