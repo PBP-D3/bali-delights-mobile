@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:bali_delights_mobile/reviews/screens/list_reviews_user.dart';
 import '../../constants.dart';
 
 class NavBar extends StatelessWidget {
@@ -118,6 +119,14 @@ class NavBar extends StatelessWidget {
                 Navigator.pop(context); // Close drawer
                 Navigator.pushNamed(context, '/store');
               },
+            ),
+            ListTile(
+              leading: const Icon(Icons.reviews),
+              title: const Text('My Reviews'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserReviewScreen()),
+              ),
             ),
           ],
         ],
