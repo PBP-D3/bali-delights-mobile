@@ -18,24 +18,77 @@ class _CartScreenState extends State<CartScreen> {
     return response;
   }
 
-  Future<void> _handleCheckout(
-      BuildContext context, CookieRequest request) async {
-    final response = await request.post(
-      '${Constants.baseUrl}/carts/api/submit-order/',
-      {'password': _passwordController.text},
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text("Processing order..."),
+            ],
+          ),
+        );
+      },
     );
+  }
 
-    if (!context.mounted) return;
+  void _showResultDialog(bool success, String message,
+      {String? remainingBalance}) {
+    Navigator.of(context).pop(); // Dismiss loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(success ? 'Success!' : 'Error'),
+          content: Text(message),
+          actions: [
+            FilledButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss result dialog
+                if (success) {
+                  Navigator.pushReplacementNamed(context, '/');
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-    if (response['status'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Order placed successfully!')),
+  Future<void> _processCheckout(
+      BuildContext context, CookieRequest request) async {
+    _showLoadingDialog();
+
+    try {
+      final response = await request.post(
+        '${Constants.baseUrl}/carts/api/submit-order/',
+        {'password': _passwordController.text},
       );
-      setState(() {});
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response['message'])),
-      );
+
+      if (response['success'] == true) {
+        _showResultDialog(
+          true,
+          'Order placed successfully!\nRemaining balance: \$${response['remaining_balance']}',
+          remainingBalance: response['remaining_balance'],
+        );
+      } else {
+        _showResultDialog(
+          false,
+          response['message'] ?? 'Failed to place order',
+        );
+      }
+    } catch (e) {
+      _showResultDialog(false, 'Error: ${e.toString()}');
+    } finally {
+      _passwordController.clear();
     }
   }
 
@@ -137,7 +190,8 @@ class _CartScreenState extends State<CartScreen> {
                       onPressed: () {
                         showDialog(
                           context: context,
-                          builder: (context) => AlertDialog(
+                          barrierDismissible: false,
+                          builder: (BuildContext context) => AlertDialog(
                             title: const Text('Confirm Order'),
                             content: TextField(
                               controller: _passwordController,
@@ -153,8 +207,9 @@ class _CartScreenState extends State<CartScreen> {
                               ),
                               FilledButton(
                                 onPressed: () {
-                                  Navigator.pop(context);
-                                  _handleCheckout(context, request);
+                                  Navigator.pop(
+                                      context); // Close password dialog
+                                  _processCheckout(context, request);
                                 },
                                 child: const Text('Confirm'),
                               ),
