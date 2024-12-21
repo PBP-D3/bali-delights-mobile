@@ -6,9 +6,10 @@ import 'package:bali_delights_mobile/store/model/store.dart';
 import 'package:bali_delights_mobile/store/screens/store_detail.dart';
 
 class AllStores extends StatefulWidget {
-  final bool isMyStores; // Add the indicator argument
+  final bool isMyStores;
+  final String searchQuery;
 
-  const AllStores({super.key, required this.isMyStores});
+  const AllStores({super.key, required this.isMyStores, required this.searchQuery});
 
   @override
   State<AllStores> createState() => _AllStoresState();
@@ -29,6 +30,13 @@ class _AllStoresState extends State<AllStores> {
         listStores.add(Store.fromJson(d));
       }
     }
+
+    if (widget.searchQuery.isNotEmpty) {
+      listStores = listStores.where((store) {
+        return store.fields.name.toLowerCase().contains(widget.searchQuery.toLowerCase());
+      }).toList();
+    }
+
     return listStores;
   }
 
@@ -53,45 +61,60 @@ class _AllStoresState extends State<AllStores> {
                 ],
               );
             } else {
-              return ListView.builder(
+              // Determine the number of columns based on screen width
+              double screenWidth = MediaQuery.of(context).size.width;
+              int crossAxisCount = screenWidth < 600 ? 1 : 2;
+
+              return GridView.builder(
+                padding: const EdgeInsets.all(16.0),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                ),
                 itemCount: snapshot.data!.length,
-                itemBuilder: (_, index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StoreDetailPage(
-                            store: snapshot.data![index],
-                          ),
+                itemBuilder: (_, index) => InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StoreDetailPage(
+                          store: snapshot.data![index],
+                          isMyStores: widget.isMyStores,
                         ),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    splashColor: Colors.blueAccent.withOpacity(0.2),
-                    highlightColor: Colors.blueAccent.withOpacity(0.1),
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "${snapshot.data![index].fields.name}",
-                              style: const TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  splashColor: Colors.blueAccent.withOpacity(0.2),
+                  highlightColor: Colors.blueAccent.withOpacity(0.1),
+                  child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Image.network(
+                            snapshot.data![index].fields.getImage(),
+                            width: double.infinity,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            "${snapshot.data![index].fields.name}",
+                            style: const TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(height: 10),
-                            Text("${snapshot.data![index].fields.description}"),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text("${snapshot.data![index].fields.description}"),
+                        ],
                       ),
                     ),
                   ),
