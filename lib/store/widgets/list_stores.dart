@@ -71,6 +71,7 @@ class _AllStoresState extends State<AllStores> {
                   crossAxisCount: crossAxisCount,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 16.0,
+                  mainAxisExtent: 140, // Adjust this value based on content
                 ),
                 itemCount: snapshot.data!.length,
                 itemBuilder: (_, index) => InkWell(
@@ -89,33 +90,82 @@ class _AllStoresState extends State<AllStores> {
                   splashColor: Colors.blueAccent.withOpacity(0.2),
                   highlightColor: Colors.blueAccent.withOpacity(0.1),
                   child: Card(
-                    elevation: 4,
+                    elevation: 3,
+                    clipBehavior: Clip.antiAlias,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Image.network(
-                            snapshot.data![index].fields.getImage(),
-                            width: double.infinity,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            "${snapshot.data![index].fields.name}",
-                            style: const TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
+                    child: Row(
+                      children: [
+                        // Square image container
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            width: 120,
+                            height: 120,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                snapshot.data![index].fields.getImage(),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[200],
+                                    child: const Icon(Icons.image_not_supported),
+                                  );
+                                },
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          Text("${snapshot.data![index].fields.description}"),
-                        ],
-                      ),
+                        ),
+                        // Content
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 12, 12, 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${snapshot.data![index].fields.name}",
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        "${snapshot.data![index].fields.location}",
+                                        style: TextStyle(
+                                          fontSize: 12.0,
+                                          color: Colors.grey[600],
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Expanded(
+                                  child: Text(
+                                    "${snapshot.data![index].fields.description}",
+                                    style: const TextStyle(fontSize: 12.0),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

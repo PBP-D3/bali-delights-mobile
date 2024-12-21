@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:bali_delights_mobile/store/screens/store_page.dart';
@@ -17,6 +20,10 @@ class EditStorePage extends StatefulWidget {
 
 class EditStorePageState extends State<EditStorePage> {
   final _formKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();
+  File? _imageFile;
+  Uint8List? _webImage;
+
   late String _name;
   late String _location;
   late String _description;
@@ -35,47 +42,29 @@ class EditStorePageState extends State<EditStorePage> {
     _choice = _photoUpload != null && _photoUpload!.isNotEmpty ? "upload" : "url";
   }
 
-  Future<void> _submitForm(CookieRequest request) async {
-    if (_formKey.currentState!.validate()) {
-      final response = await request.postJson(
-        '${Constants.baseUrl}/stores/edit-flutter/${widget.store.pk}/',
-        jsonEncode({
-          'name': _name,
-          'location': _location,
-          'description': _description,
-          'photo_upload': _photoUpload,
-          'photo': _photo,
-        }),
-      );
-
-      if (!mounted) return;
-
-      if (response['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Store successfully updated!"),
-          ),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const StorePage(),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Failed to update the store. Try again."),
-          ),
-        );
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        if (kIsWeb) {
+          var bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _webImage = bytes;
+          });
+        } else {
+          setState(() {
+            _imageFile = File(pickedFile.path);
+          });
+        }
       }
+    } catch (e) {
+      print(e);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Store'),
@@ -183,6 +172,11 @@ class EditStorePageState extends State<EditStorePage> {
                           onChanged: (value) {
                             setState(() {
                               _choice = value!;
+                              // Clear URL input when switching to upload
+                              _photo = null;
+                              // Clear file input when switching
+                              _imageFile = null;
+                              _webImage = null;
                             });
                           },
                         ),
@@ -193,6 +187,13 @@ class EditStorePageState extends State<EditStorePage> {
                           onChanged: (value) {
                             setState(() {
                               _choice = value!;
+                              // Clear file inputs when switching to URL
+                              _imageFile = null;
+                              _webImage = null;
+                              // Clear URL input
+                              _photo = null;
+                              // Also clear the existing photo_upload if any
+                              _photoUpload = null;
                             });
                           },
                         ),
@@ -203,30 +204,65 @@ class EditStorePageState extends State<EditStorePage> {
                 ),
               ),
 
-              // Input Photo Upload
               if (_choice == "upload")
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    initialValue: _photoUpload,
-                    decoration: InputDecoration(
-                      hintText: "Photo Upload",
-                      labelText: "Photo Upload",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0),
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: _pickImage,
+                        child: const Text("Pick Image"),
                       ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _photoUpload = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Photo Upload cannot be empty!";
-                      }
-                      return null;
-                    },
+                      const SizedBox(height:
+                      8),
+                      // Show new image if selected
+                      if (_imageFile != null || _webImage != null)
+                        Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: kIsWeb
+                              ? (_webImage != null 
+                                  ? Image.memory(_webImage!)
+                                  : const Center(child: Text("No image selected")))
+                              : (_imageFile != null
+                                  ? Image.file(_imageFile!)
+                                  : const Center(child: Text("No image selected"))),
+                        ),
+                      // Show existing image if no new image is selected
+                      if (_imageFile == null && 
+                          _webImage == null && 
+                          _photoUpload != null &&
+                          _photoUpload!.isNotEmpty)
+                        Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: Image.network(
+                            _photoUpload!,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Text("Failed to load existing image"),
+                              );
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
                   ),
                 ),
 
@@ -268,7 +304,48 @@ class EditStorePageState extends State<EditStorePage> {
                     ),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        await _submitForm(request);
+                        String? base64Image;
+                        if (_choice == "upload") {
+                          if (kIsWeb && _webImage != null) {
+                            base64Image = base64Encode(_webImage!);
+                          } else if (_imageFile != null) {
+                            final bytes = await _imageFile!.readAsBytes();
+                            base64Image = base64Encode(bytes);
+                          }
+                        }
+
+                        final requestBody = {
+                          'name': _name,
+                          'location': _location,
+                          'description': _description,
+                          'photo': _photo,
+                          'photo_upload': base64Image != null ? 'data:image/png;base64,$base64Image' : _photoUpload,
+                        };
+
+                        try {
+                          final response = await request.postJson(
+                            "${Constants.baseUrl}/stores/edit-flutter/${widget.store.pk}/",
+                            jsonEncode(requestBody),
+                          );
+                          
+                          if (response['status'] == 'success') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Store successfully updated!")),
+                            );
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const StorePage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Failed to update store")),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Error: $e")),
+                          );
+                        }
                       }
                     },
                     child: const Text(
