@@ -97,11 +97,7 @@ packages:
     source: sdk
     version: "0.0.0"
   http:
-<<<<<<< HEAD
-    dependency: transitive
-=======
     dependency: "direct main"
->>>>>>> 2bd0738f27334423b65930c4b90c5a31cc84a5c8
     description:
       name: http
       sha256: b9c29a161230ee03d3ccf545097fccd9b87a5264228c5d348202e0f0c28f9010

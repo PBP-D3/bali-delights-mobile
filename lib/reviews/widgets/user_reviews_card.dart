@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bali_delights_mobile/reviews/models/reviews.dart';
+import 'package:bali_delights_mobile/reviews/screens/list_reviews_product.dart';
 
-
-// ReviewCard widget
 class ReviewCard extends StatelessWidget {
   final Review review;
   final Function(int) onDelete;
@@ -19,11 +18,46 @@ class ReviewCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              review.user.username,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            // Product Image
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewScreen(productId: review.product.id),
+                  ),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  image: DecorationImage(
+                    image: NetworkImage(review.product.image),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
             ),
-            SizedBox(height: 5),
+            SizedBox(height: 10),
+            // Product Name
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewScreen(productId: review.product.id),
+                  ),
+                );
+              },
+              child: Text(
+                review.product.name,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            SizedBox(height: 10),
             Text(
               'Rating: ${review.rating} / 5',
               style: TextStyle(color: Colors.yellow[700]),
