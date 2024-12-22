@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart'; // Pastikan path ke ApiService benar
+import 'package:bali_delights_mobile/store/model/store.dart';
 
 class AddChatModal extends StatefulWidget {
   final Function(int storeId) onChatCreated;
+  final List<Store> stores;
 
-  const AddChatModal({required this.onChatCreated, Key? key}) : super(key: key);
+  const AddChatModal({
+    required this.onChatCreated, 
+    required this.stores,
+    Key? key
+  }) : super(key: key);
 
   @override
   _AddChatModalState createState() => _AddChatModalState();
@@ -12,32 +17,20 @@ class AddChatModal extends StatefulWidget {
 
 class _AddChatModalState extends State<AddChatModal> {
   final TextEditingController _searchCtrl = TextEditingController();
-  List<Map<String, dynamic>> _stores = [];
-  bool _isLoading = true;
+  List<Store> _filteredStores = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchStores();
+    _filteredStores = widget.stores;
   }
 
-  Future<void> _fetchStores([String? searchQuery]) async {
+  void _filterStores(String query) {
     setState(() {
-      _isLoading = true;
+      _filteredStores = widget.stores.where((store) {
+        return store.fields.name.toLowerCase().contains(query.toLowerCase());
+      }).toList();
     });
-
-    try {
-      final stores = await ApiService.fetchStores(searchQuery: searchQuery);
-      setState(() {
-        _stores = stores;
-      });
-    } catch (e) {
-      debugPrint('Error fetching stores: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 
   @override
@@ -68,47 +61,45 @@ class _AddChatModalState extends State<AddChatModal> {
                       hintText: "Search stores",
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: (val) => _fetchStores(val),
+                    onChanged: _filterStores,
                   ),
                   const SizedBox(height: 16),
-                  _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : Container(
-                          height: 200,
-                          child: _stores.isEmpty
-                              ? const Center(child: Text("No stores found."))
-                              : ListView.builder(
-                                  itemCount: _stores.length,
-                                  itemBuilder: (context, index) {
-                                    final store = _stores[index];
-                                    return GestureDetector(
-                                      onTap: () {
-                                        widget.onChatCreated(store["id"]);
-                                        Navigator.pop(context);
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(12),
-                                        margin: const EdgeInsets.only(bottom: 8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[100],
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            CircleAvatar(
-                                              backgroundImage: NetworkImage(
-                                                store['photo_url'] ?? '',
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Text(store["name"]),
-                                          ],
+                  Container(
+                    height: 200,
+                    child: _filteredStores.isEmpty
+                        ? const Center(child: Text("No stores found."))
+                        : ListView.builder(
+                            itemCount: _filteredStores.length,
+                            itemBuilder: (context, index) {
+                              final store = _filteredStores[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  widget.onChatCreated(store.pk);
+                                  Navigator.pop(context);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundImage: NetworkImage(
+                                          store.fields.getImage(),
                                         ),
                                       ),
-                                    );
-                                  },
+                                      const SizedBox(width: 12),
+                                      Text(store.fields.name),
+                                    ],
+                                  ),
                                 ),
-                        ),
+                              );
+                            },
+                          ),
+                  ),
                 ],
               ),
             ),

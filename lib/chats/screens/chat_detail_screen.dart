@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../api_service.dart';
-import '../../models/message.dart';
+import 'api_service.dart'; // Pastikan path ke ApiService benar
+import 'package:bali_delights_mobile/chats/models/message.dart';
 import 'edit_message_modal.dart';
 
 class ChatDetailScreen extends StatefulWidget {
@@ -62,7 +62,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         messageId: messageId, // Tambahkan messageId
         initialContent: currentContent,
         onSave: (updatedContent) async {
-          final success = await ApiService.editMessage(messageId, updatedContent);
+          final success =
+              await ApiService.editMessage(messageId, updatedContent);
           if (success) {
             Navigator.pop(ctx);
             loadMessages();
@@ -98,7 +99,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: const Color(0xFF8C5D2D), // amber-800
                         borderRadius: BorderRadius.circular(4),
@@ -123,7 +125,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       const SizedBox(width: 8),
                       Text(
                         custName ?? storeName,
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.grey[800]),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -143,17 +149,26 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final msg = _messages[index];
-                          const senderIsUser = true; // Atur sesuai logika autentikasi
+                          const senderIsUser =
+                              true; // Atur sesuai logika autentikasi
                           return GestureDetector(
-                            onLongPress: () => showEditModal(msg.id, msg.content),
+                            onLongPress: () =>
+                                showEditModal(msg.id, msg.content),
                             child: Container(
-                              margin: EdgeInsets.symmetric(vertical: 4),
-                              alignment: senderIsUser ? Alignment.centerRight : Alignment.centerLeft,
+                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              alignment: senderIsUser
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
                               child: Container(
-                                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-                                padding: EdgeInsets.all(8),
+                                constraints: BoxConstraints(
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width *
+                                            0.7),
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: senderIsUser ? Color(0xFFC6AC8F) : Color(0xFFEAE0D5),
+                                  color: senderIsUser
+                                      ? const Color(0xFFC6AC8F)
+                                      : const Color(0xFFEAE0D5),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -188,8 +203,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       style: const TextStyle(fontSize: 16),
                       decoration: InputDecoration(
                         hintText: "Type a message",
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
                       ),
                     ),
                   ),
@@ -202,7 +219,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         color: const Color(0xFFC6AC8F),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Icon(Icons.send, color: Colors.white, size: 20),
+                      child:
+                          const Icon(Icons.send, color: Colors.white, size: 20),
                     ),
                   )
                 ],

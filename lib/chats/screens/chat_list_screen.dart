@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+import '../services/api_service.dart';
 import '../models/chat.dart';
 import 'chat_detail_screen.dart';
 import 'delete_chat_modal.dart';
 import 'add_chat_modal.dart';
+import 'package:bali_delights_mobile/store/model/store.dart';
+import 'package:bali_delights_mobile/constants.dart';
+import 'store_detail_screen.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({Key? key}) : super(key: key);
@@ -16,6 +21,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<Chat> _chats = [];
   bool _loading = true;
+  List<Store> _stores = [];
 
   // Simulasi role, ganti sesuai kebutuhan (misalnya: 'shop_owner' atau 'user')
   final String userRole = 'user';
@@ -24,6 +30,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   void initState() {
     super.initState();
     loadChats();
+    fetchStores();
   }
 
   Future<void> loadChats() async {
@@ -37,7 +44,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
         _chats = chats;
       });
     } catch (e) {
-      debugPrint('Error loading chats: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading chats: $e')),
+      );
     } finally {
       setState(() {
         _loading = false;
@@ -45,14 +54,34 @@ class _ChatListScreenState extends State<ChatListScreen> {
     }
   }
 
+  Future<void> fetchStores() async {
+    final request = context.read<CookieRequest>();
+    try {
+      final response = await request.get('${Constants.baseUrl}/stores/json/');
+      List<Store> stores = [];
+      for (var item in response) {
+        if (item != null) {
+          stores.add(Store.fromJson(item));
+        }
+      }
+      setState(() {
+        _stores = stores;
+      });
+    } catch (e) {
+      debugPrint('Error fetching stores: $e');
+    }
+  }
+
   void openAddChatModal() {
     showDialog(
       context: context,
       builder: (ctx) {
-        return AddChatModal(onChatCreated: (storeId) {
-          // Setelah chat dibuat, refresh daftar chat
-          loadChats();
-        });
+        return AddChatModal(
+          stores: _stores,
+          onChatCreated: (storeId) {
+            loadChats();
+          },
+        );
       },
     );
   }
@@ -66,6 +95,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
           Navigator.pop(context);
           loadChats();
         },
+      ),
+    );
+  }
+
+  void navigateToStoreDetail(int storeId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => StoreDetailScreen(storeId: storeId),
       ),
     );
   }
@@ -88,7 +126,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
-              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 10)
+              ],
             ),
             margin: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
             padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
@@ -194,16 +234,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           CrossAxisAlignment.center,
                                       children: [
                                         if (userRole != 'shop_owner')
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(50),
-                                            child: Image.network(
-                                              chat.storeName.isNotEmpty
-                                                  ? 'https://via.placeholder.com/40'
-                                                  : 'https://via.placeholder.com/40',
-                                              width: 40,
-                                              height: 40,
-                                              fit: BoxFit.cover,
+                                          GestureDetector(
+                                            onTap: () => navigateToStoreDetail(1),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(50),
+                                              child: Image.network(
+                                                chat.storeName.isNotEmpty
+                                                    ? 'https://via.placeholder.com/40'
+                                                    : 'https://via.placeholder.com/40',
+                                                width: 40,
+                                                height: 40,
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         if (userRole != 'shop_owner')

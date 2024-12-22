@@ -1,19 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../models/chat.dart';
-import '../../models/message.dart';
+import '../models/chat.dart';
+import '../models/message.dart';
 import 'dart:io';
 import '../models/chat.dart';
 import '../models/message.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8000'; // Ganti dengan URL backend Anda
+  static const String baseUrl =
+      'http://127.0.0.1:8000'; // Ganti dengan URL backend Anda
   static const Map<String, String> headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer YOUR_AUTH_TOKEN', // Tambahkan autentikasi jika diperlukan
+    'Authorization':
+        'Bearer YOUR_AUTH_TOKEN', // Tambahkan autentikasi jika diperlukan
   };
 
-  /// Fetch list of chats
+  // Fetch list of chats
   static Future<List<Chat>> fetchChats() async {
     final url = Uri.parse('$baseUrl/api/chats/');
     final response = await http.get(url, headers: headers);
@@ -27,13 +29,16 @@ class ApiService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> fetchStores({String? searchQuery}) async {
-    final uri = Uri.parse('$baseUrl/api/stores/').replace(queryParameters: {
-      if (searchQuery != null) 'search': searchQuery,
-    });
+  static Future<List<Map<String, dynamic>>> fetchStores(
+      {String? searchQuery}) async {
+    final uri =
+        Uri.parse('$baseUrl/stores/show_json/').replace(queryParameters: {
+          if (searchQuery != null) 'search': searchQuery,
+        });
 
     final response = await http.get(uri, headers: {
-      'Authorization': 'Bearer YOUR_AUTH_TOKEN', // Tambahkan jika menggunakan autentikasi
+      'Authorization':
+          'Bearer YOUR_AUTH_TOKEN', // Tambahkan jika menggunakan autentikasi
     });
 
     if (response.statusCode == 200) {
@@ -78,23 +83,23 @@ class ApiService {
 
   /// Edit an existing message
   static Future<bool> editMessage(int messageId, String updatedContent) async {
-  final url = Uri.parse('$baseUrl/api/messages/$messageId/edit/');
-  final response = await http.post(
-    url,
-    headers: {
-      'Authorization': 'Bearer YOUR_AUTH_TOKEN', // Tambahkan jika diperlukan
-      'Content-Type': 'application/json',
-    },
-    body: json.encode({'content': updatedContent}),
-  );
+    final url = Uri.parse('$baseUrl/api/messages/$messageId/edit/');
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer YOUR_AUTH_TOKEN', // Tambahkan jika diperlukan
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'content': updatedContent}),
+    );
 
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    return data['success'] == true;
-  } else {
-    return false;
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['success'] == true;
+    } else {
+      return false;
+    }
   }
-}
 
   /// Create a new chat
   static Future<Map<String, dynamic>> createChat(int storeId) async {
@@ -116,7 +121,8 @@ class ApiService {
   static Future<bool> deleteChat(int chatId) async {
     final url = Uri.parse('$baseUrl/api/chats/$chatId/delete/');
     final response = await http.post(url, headers: {
-      'Authorization': 'Bearer YOUR_AUTH_TOKEN', // Tambahkan token autentikasi jika diperlukan
+      'Authorization':
+          'Bearer YOUR_AUTH_TOKEN', // Tambahkan token autentikasi jika diperlukan
     });
 
     if (response.statusCode == 200) {
