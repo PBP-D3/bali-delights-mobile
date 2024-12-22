@@ -50,18 +50,39 @@ class _AllStoresState extends State<AllStores> {
           if (snapshot.data == null) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            if (!snapshot.hasData) {
-              return const Column(
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'No data available.',
-                    style: TextStyle(fontSize: 20, color: Color(0xff59A5D8)),
+                  Icon(
+                    Icons.store_mall_directory,
+                    size: 64,
+                    color: Colors.grey[400],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No Stores Currently Available',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  if (widget.searchQuery.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Try adjusting your search',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
                 ],
-              );
-            } else {
-              // Determine the number of columns based on screen width
+              ),
+            );
+          } else {
               double screenWidth = MediaQuery.of(context).size.width;
               int crossAxisCount = screenWidth < 600 ? 1 : 2;
 
@@ -71,7 +92,7 @@ class _AllStoresState extends State<AllStores> {
                   crossAxisCount: crossAxisCount,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 16.0,
-                  mainAxisExtent: 140, // Adjust this value based on content
+                  mainAxisExtent: 140, 
                 ),
                 itemCount: snapshot.data!.length,
                 itemBuilder: (_, index) => InkWell(
@@ -97,7 +118,6 @@ class _AllStoresState extends State<AllStores> {
                     ),
                     child: Row(
                       children: [
-                        // Square image container
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: SizedBox(
@@ -118,7 +138,6 @@ class _AllStoresState extends State<AllStores> {
                             ),
                           ),
                         ),
-                        // Content
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(0, 12, 12, 12),

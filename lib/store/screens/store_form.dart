@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
@@ -26,13 +28,11 @@ class _StoreFormPageState extends State<StoreFormPage> {
   String _name = "";
   String _location = "";
   String _description = "";
-  String? _photoUpload;
   String? _photo;
   String _choice = "upload";
 
 
   Future<void> _pickImage() async {
-    try {
       final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
         if (kIsWeb) {
@@ -46,10 +46,7 @@ class _StoreFormPageState extends State<StoreFormPage> {
           });
         }
       }
-    } catch (e) {
-      print(e);
-    }
-  }
+    } 
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +59,6 @@ class _StoreFormPageState extends State<StoreFormPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Input Name
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
@@ -86,8 +82,6 @@ class _StoreFormPageState extends State<StoreFormPage> {
                   },
                 ),
               ),
-
-              // Input Location
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
@@ -111,8 +105,6 @@ class _StoreFormPageState extends State<StoreFormPage> {
                   },
                 ),
               ),
-
-              // Input Description
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
@@ -136,8 +128,6 @@ class _StoreFormPageState extends State<StoreFormPage> {
                   },
                 ),
               ),
-
-              // Image Selection Option
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -155,9 +145,7 @@ class _StoreFormPageState extends State<StoreFormPage> {
                           onChanged: (value) {
                             setState(() {
                               _choice = value!;
-                              // Clear URL input when switching to upload
                               _photo = null;
-                              // Clear file input when switching
                               _imageFile = null;
                               _webImage = null;
                             });
@@ -170,10 +158,8 @@ class _StoreFormPageState extends State<StoreFormPage> {
                           onChanged: (value) {
                             setState(() {
                               _choice = value!;
-                              // Clear file inputs when switching to URL
                               _imageFile = null;
                               _webImage = null;
-                              // Clear URL input
                               _photo = null;
                             });
                           },
@@ -184,8 +170,6 @@ class _StoreFormPageState extends State<StoreFormPage> {
                   ],
                 ),
               ),
-
-              // Input Photo Upload
               if (_choice == "upload")
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -210,8 +194,6 @@ class _StoreFormPageState extends State<StoreFormPage> {
                     ],
                   ),
                 ),
-
-              // Input Photo URL
               if (_choice == "url")
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -228,16 +210,10 @@ class _StoreFormPageState extends State<StoreFormPage> {
                         _photo = value;
                       });
                     },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Photo URL cannot be empty!";
-                      }
-                      return null;
-                    },
+                    // Remove validator or make it always return null
+                    validator: (value) => null, // This allows empty/null values
                   ),
                 ),
-
-              // Submit Button
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
