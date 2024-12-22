@@ -7,29 +7,40 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:bali_delights_mobile/store/screens/store_page.dart';
 import 'package:bali_delights_mobile/constants.dart';
+import 'package:bali_delights_mobile/store/model/store.dart';
 
-class StoreFormPage extends StatefulWidget {
-  const StoreFormPage({super.key});
+class EditStorePage extends StatefulWidget {
+  final Store store;
+
+  const EditStorePage({super.key, required this.store});
 
   @override
-  State<StoreFormPage> createState() => _StoreFormPageState();
+  EditStorePageState createState() => EditStorePageState();
 }
 
-
-
-class _StoreFormPageState extends State<StoreFormPage> {
+class EditStorePageState extends State<EditStorePage> {
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
   File? _imageFile;
   Uint8List? _webImage;
 
-  String _name = "";
-  String _location = "";
-  String _description = "";
-  String? _photoUpload;
-  String? _photo;
+  late String _name;
+  late String _location;
+  late String _description;
+  late String? _photoUpload;
+  late String? _photo;
   String _choice = "upload";
 
+  @override
+  void initState() {
+    super.initState();
+    _name = widget.store.fields.name;
+    _location = widget.store.fields.location;
+    _description = widget.store.fields.description;
+    _photoUpload = widget.store.fields.photoUpload;
+    _photo = widget.store.fields.photo;
+    _choice = _photoUpload != null && _photoUpload!.isNotEmpty ? "upload" : "url";
+  }
 
   Future<void> _pickImage() async {
     try {
@@ -55,6 +66,9 @@ class _StoreFormPageState extends State<StoreFormPage> {
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit Store'),
+      ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -66,6 +80,7 @@ class _StoreFormPageState extends State<StoreFormPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
+                  initialValue: _name,
                   decoration: InputDecoration(
                     hintText: "Store Name",
                     labelText: "Store Name",
@@ -91,6 +106,7 @@ class _StoreFormPageState extends State<StoreFormPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
+                  initialValue: _location,
                   decoration: InputDecoration(
                     hintText: "Location",
                     labelText: "Location",
@@ -116,6 +132,7 @@ class _StoreFormPageState extends State<StoreFormPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
+                  initialValue: _description,
                   decoration: InputDecoration(
                     hintText: "Description",
                     labelText: "Description",
@@ -175,6 +192,8 @@ class _StoreFormPageState extends State<StoreFormPage> {
                               _webImage = null;
                               // Clear URL input
                               _photo = null;
+                              // Also clear the existing photo_upload if any
+                              _photoUpload = null;
                             });
                           },
                         ),
@@ -185,7 +204,6 @@ class _StoreFormPageState extends State<StoreFormPage> {
                 ),
               ),
 
-              // Input Photo Upload
               if (_choice == "upload")
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -195,17 +213,54 @@ class _StoreFormPageState extends State<StoreFormPage> {
                         onPressed: _pickImage,
                         child: const Text("Pick Image"),
                       ),
+                      const SizedBox(height:
+                      8),
+                      // Show new image if selected
                       if (_imageFile != null || _webImage != null)
                         Container(
                           width: 200,
                           height: 200,
-                          margin: const EdgeInsets.only(top: 8),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
                           ),
                           child: kIsWeb
-                              ? Image.memory(_webImage!)
-                              : Image.file(_imageFile!),
+                              ? (_webImage != null 
+                                  ? Image.memory(_webImage!)
+                                  : const Center(child: Text("No image selected")))
+                              : (_imageFile != null
+                                  ? Image.file(_imageFile!)
+                                  : const Center(child: Text("No image selected"))),
+                        ),
+                      // Show existing image if no new image is selected
+                      if (_imageFile == null && 
+                          _webImage == null && 
+                          _photoUpload != null &&
+                          _photoUpload!.isNotEmpty)
+                        Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: Image.network(
+                            _photoUpload!,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Center(
+                                child: Text("Failed to load existing image"),
+                              );
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                     ],
                   ),
@@ -216,6 +271,7 @@ class _StoreFormPageState extends State<StoreFormPage> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
+                    initialValue: _photo,
                     decoration: InputDecoration(
                       hintText: "Photo URL",
                       labelText: "Photo URL",
@@ -263,18 +319,18 @@ class _StoreFormPageState extends State<StoreFormPage> {
                           'location': _location,
                           'description': _description,
                           'photo': _photo,
-                          'photo_upload': base64Image != null ? 'data:image/png;base64,$base64Image' : null,
+                          'photo_upload': base64Image != null ? 'data:image/png;base64,$base64Image' : _photoUpload,
                         };
 
                         try {
                           final response = await request.postJson(
-                            "${Constants.baseUrl}/stores/register-store-flutter/",
+                            "${Constants.baseUrl}/stores/edit-flutter/${widget.store.pk}/",
                             jsonEncode(requestBody),
                           );
                           
                           if (response['status'] == 'success') {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Store successfully registered!")),
+                              const SnackBar(content: Text("Store successfully updated!")),
                             );
                             Navigator.pushReplacement(
                               context,
@@ -282,7 +338,7 @@ class _StoreFormPageState extends State<StoreFormPage> {
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Failed to register store")),
+                              const SnackBar(content: Text("Failed to update store")),
                             );
                           }
                         } catch (e) {
