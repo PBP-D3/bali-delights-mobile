@@ -5,6 +5,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:bali_delights_mobile/store/screens/edit_store.dart';
 import 'package:bali_delights_mobile/store/screens/store_page.dart';
+import 'package:bali_delights_mobile/product/screens/add_product.dart';
 
 class StoreDetailPage extends StatelessWidget {
   final Store store;
@@ -128,7 +129,12 @@ class StoreDetailPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AddProductScreen(storeId: store.pk)),
+                  );
+                },
                 icon: const Icon(Icons.add_shopping_cart),
                 label: const Text('Add Product'),
                 style: ElevatedButton.styleFrom(
@@ -136,7 +142,7 @@ class StoreDetailPage extends StatelessWidget {
                   foregroundColor: Colors.white,
                 ),
               ),
-            ),
+            )
           ] else ...[
             SizedBox(
               width: double.infinity,
