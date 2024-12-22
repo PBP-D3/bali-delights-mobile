@@ -129,6 +129,14 @@ class NavBar extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => UserReviewScreen()),
               ),
             ),
+            ListTile(
+              leading: const Icon(Icons.dataset_rounded),
+              title: const Text('Products'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProductPage()),
+              ),
+            ),
           ],
         ],
       ),

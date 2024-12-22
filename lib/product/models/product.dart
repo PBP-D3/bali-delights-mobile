@@ -1,81 +1,59 @@
-// To parse this JSON data, do
-//
-//     final product = productFromJson(jsonString);
-
 import 'dart:convert';
 
-List<Product> productFromJson(String str) => List<Product>.from(json.decode(str).map((x) => Product.fromJson(x)));
-
-String productToJson(List<Product> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
-
 class Product {
-    String model;
-    int pk;
-    Fields fields;
+  final int id;
+  final String name;
+  final String description;
+  final double price;
+  final int stock;
+  final String category;
+  final int storeId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? photoUrl;
+  final String? photoUpload;
+  final double? averageRating;  // New field
 
-    Product({
-        required this.model,
-        required this.pk,
-        required this.fields,
-    });
+  Product({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.stock,
+    required this.category,
+    required this.storeId,
+    required this.createdAt,
+    required this.updatedAt,
+    this.photoUrl,
+    this.photoUpload,
+    this.averageRating,  
+  });
 
-    factory Product.fromJson(Map<String, dynamic> json) => Product(
-        model: json["model"],
-        pk: json["pk"],
-        fields: Fields.fromJson(json["fields"]),
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      price: double.parse(json['price'].toString()),
+      stock: json['stock'],
+      category: json['category'],
+      storeId: json['store_id'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+      photoUrl: json['photo_url'],
+      photoUpload: json['photo_upload'],
+      averageRating: json['average_rating'] != null 
+          ? double.parse(json['average_rating'].toString()) 
+          : null,  
     );
+  }
 
-    Map<String, dynamic> toJson() => {
-        "model": model,
-        "pk": pk,
-        "fields": fields.toJson(),
-    };
-}
-
-class Fields {
-    String name;
-    double price;
-    String photoUrl;
-    String description;
-    String category;
-    int stock;
-    int storeId;
-    String createdAt;
-    String updatedAt;
-
-    Fields({
-        required this.name,
-        required this.price,
-        required this.photoUrl,
-        required this.description,
-        required this.category,
-        required this.stock,
-        required this.storeId,
-        required this.createdAt,
-        required this.updatedAt,
-    });
-
-    factory Fields.fromJson(Map<String, dynamic> json) => Fields(
-        name: json["name"],
-        price: json["price"]?.toDouble(),
-        photoUrl: json["photo_url"],
-        description: json["description"],
-        category: json["category"],
-        stock: json["stock"],
-        storeId: json["store_id"],
-        createdAt: json["created_at"],
-        updatedAt: json["updated_at"],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "name": name,
-        "price": price,
-        "photo_url": photoUrl,
-        "description": description,
-        "category": category,
-        "stock": stock,
-        "store_id": storeId,
-        "created_at": createdAt,
-        "updated_at": updatedAt,
-    };
+  String getImage() {
+    if (photoUrl != null) {
+      return photoUrl!;
+    } else if (photoUpload != null) {
+      return photoUpload!;
+    }
+    return "https://img.freepik.com/premium-vector/shop-vector-design-white-background_917213-257003.jpg?semt=ais_hybrid";
+  }
 }
