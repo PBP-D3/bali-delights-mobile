@@ -4,12 +4,20 @@ import 'package:provider/provider.dart';
 import 'package:bali_delights_mobile/constants.dart';
 import 'package:bali_delights_mobile/chats/models/message.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
+import '../services/api_service.dart';
 import 'edit_message_modal.dart';
 
 class ChatDetailScreen extends StatefulWidget {
-  final int chatId;
+  final int storeId; // Changed from chatId to storeId
+  final String storeName; // Added store name
+  final String storeImage; // Added store image
 
-  const ChatDetailScreen({required this.chatId, Key? key}) : super(key: key);
+  const ChatDetailScreen(
+      {required this.storeId,
+      required this.storeName,
+      required this.storeImage,
+      Key? key})
+      : super(key: key);
 
   @override
   _ChatDetailScreenState createState() => _ChatDetailScreenState();
@@ -19,50 +27,88 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController _controller = TextEditingController();
   List<Message> _messages = [];
   bool _loading = true;
+  int? _chatId; // Added to store the chat ID
 
   @override
   void initState() {
     super.initState();
-    loadMessages();
+    _initializeChat();
+  }
+
+  Future<void> _initializeChat() async {
+    setState(() => _loading = true);
+    try {
+      final request = context.read<CookieRequest>();
+
+      final chatResult =
+          await ApiService.getOrCreateChat(request, widget.storeId);
+
+      if (chatResult['success']) {
+        setState(() {
+          _chatId = chatResult['chat_id'];
+          if (chatResult['messages'] != null) {
+            // Add user_id to each message for proper sender identification
+            final userId = chatResult['user']['id'];
+            final List<dynamic> messages = chatResult['messages'];
+            _messages = messages
+                .map((msg) => Message.fromJson({
+                      ...msg,
+                      'user_id': userId, // Add user_id to the message JSON
+                    }))
+                .toList();
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error initializing chat: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
+    }
   }
 
   Future<void> loadMessages() async {
-    setState(() {
-      _loading = true;
-    });
-    final request = context.watch<CookieRequest>();
+    if (_chatId == null) return;
+
     try {
-      final response = await request
-          .get('${Constants.baseUrl}/api/chats/${widget.chatId}/messages/');
-      setState(() {
-        _messages = (response['messages'] as List)
-            .map((json) => Message.fromJson(json))
-            .toList();
-      });
+      final request = context.read<CookieRequest>();
+      final response = await ApiService.fetchMessages(request, _chatId!);
+
+      // Get user ID from the response
+      final userId = response['user']['id'];
+
+      if (mounted) {
+        setState(() {
+          _messages = (response['messages'] as List)
+              .map((msg) => Message.fromJson({
+                    ...msg,
+                    'user_id': userId, // Add user_id to each message
+                  }))
+              .toList();
+        });
+      }
     } catch (e) {
       debugPrint('Error loading messages: $e');
-    } finally {
-      setState(() {
-        _loading = false;
-      });
     }
   }
 
   Future<void> sendMessage() async {
+    if (_chatId == null) return;
+
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    final request = context.watch<CookieRequest>();
+    final request = context.read<CookieRequest>();
     try {
-      final response = await request
-          .post('${Constants.baseUrl}/api/chats/${widget.chatId}/send/', {
-        'message': text,
-      });
-      if (response['success']) {
+      final success = await ApiService.sendMessage(request, _chatId!, text);
+      if (success) {
         _controller.clear();
         loadMessages();
-      } else {
-        debugPrint('Failed to send message');
       }
     } catch (e) {
       debugPrint('Error sending message: $e');
@@ -76,17 +122,17 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         messageId: messageId,
         initialContent: currentContent,
         onSave: (updatedContent) async {
-          final request = context.watch<CookieRequest>();
+          final request =
+              context.read<CookieRequest>(); // Changed from watch to read
           try {
-            final response = await request
-                .post('${Constants.baseUrl}/api/messages/$messageId/edit/', {
-              'content': updatedContent,
-            });
-            if (response['success']) {
+            final success = await ApiService.editMessage(
+              request,
+              messageId,
+              updatedContent,
+            );
+            if (success && mounted) {
               Navigator.pop(ctx);
               loadMessages();
-            } else {
-              debugPrint('Failed to edit message');
             }
           } catch (e) {
             debugPrint('Error editing message: $e');
@@ -120,13 +166,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8C5D2D), // amber-800
+                        color: const Color(0xFF8C5D2D),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text(
-                        "Back",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      child: const Text("Back",
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ),
                   Row(
@@ -134,16 +178,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(50),
                         child: Image.network(
-                          'https://via.placeholder.com/40', // Replace with actual store image URL
+                          widget.storeImage,
                           width: 32,
                           height: 32,
                           fit: BoxFit.cover,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        "Store Name", // Replace with actual store name
-                        style: TextStyle(
+                      Text(
+                        widget.storeName,
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
                           color: Colors.grey,
@@ -151,7 +195,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(width: 48), // Dummy spacing
+                  const SizedBox(width: 48),
                 ],
               ),
             ),

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'api_service.dart';
+import '../services/api_service.dart';
 import '../models/chat.dart';
 import 'chat_detail_screen.dart';
 import 'delete_chat_modal.dart';
 import 'add_chat_modal.dart';
 import 'package:bali_delights_mobile/store/model/store.dart';
 import 'package:bali_delights_mobile/constants.dart';
-import 'store_detail_screen.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({Key? key}) : super(key: key);
@@ -34,35 +33,28 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 
   Future<void> loadChats() async {
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
 
-    final request = context.watch<CookieRequest>();
     try {
-      // Using the correct endpoint from urls.py
-      final response = await request.get('${Constants.baseUrl}/chats/');
-      
-      if (response is List) {
-        setState(() {
-          _chats = response.map((json) => Chat.fromJson(json)).toList();
-        });
-      } else {
-        debugPrint('Unexpected response format');
-      }
+      final request = context.read<CookieRequest>();
+      final chats = await ApiService.fetchChats(request);
+      print(chats);
+      setState(() => _chats = chats);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading chats: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading chats: $e')),
+        );
+      }
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
   Future<void> fetchStores() async {
-    final request = context.watch<CookieRequest>();
+    final request = context.read<CookieRequest>();
     try {
       final response = await request.get('${Constants.baseUrl}/stores/json/');
       List<Store> stores = [];
@@ -104,37 +96,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
         },
       ),
     );
-  }
-
-  void navigateToStoreDetail(int storeId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => StoreDetailScreen(storeId: storeId),
-      ),
-    );
-  }
-
-  void navigateToChat(int storeId) async {
-    final request = context.read<CookieRequest>();
-    try {
-      // Using create_chat endpoint from urls.py
-      final response = await request.post(
-        '${Constants.baseUrl}/chats/api/chats/create/',
-        {'store_id': storeId.toString()}
-      );
-
-      if (response['success'] && context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ChatDetailScreen(chatId: response['chat_id']),
-          ),
-        ).then((_) => loadChats()); // Refresh chat list after returning
-      }
-    } catch (e) {
-      debugPrint('Error creating chat: $e');
-    }
   }
 
   @override
@@ -246,8 +207,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) =>
-                                            ChatDetailScreen(chatId: chat.id),
+                                        builder: (_) => ChatDetailScreen(
+                                          storeId: chat.storeId,
+                                          storeName: chat.storeName,
+                                          storeImage:
+                                              'https://via.placeholder.com/40',
+                                        ),
                                       ),
                                     );
                                   },
@@ -263,20 +228,16 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           CrossAxisAlignment.center,
                                       children: [
                                         if (userRole != 'shop_owner')
-                                          GestureDetector(
-                                            onTap: () =>
-                                                navigateToStoreDetail(1),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(50),
-                                              child: Image.network(
-                                                chat.storeName.isNotEmpty
-                                                    ? 'https://via.placeholder.com/40'
-                                                    : 'https://via.placeholder.com/40',
-                                                width: 40,
-                                                height: 40,
-                                                fit: BoxFit.cover,
-                                              ),
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(50),
+                                            child: Image.network(
+                                              chat.storeName.isNotEmpty
+                                                  ? 'https://via.placeholder.com/40'
+                                                  : 'https://via.placeholder.com/40',
+                                              width: 40,
+                                              height: 40,
+                                              fit: BoxFit.cover,
                                             ),
                                           ),
                                         if (userRole != 'shop_owner')
@@ -297,7 +258,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              "Last message at ${chat.lastMessageTime}",
+                                              chat.getLastMessagePreview(),
                                               style: TextStyle(
                                                   fontSize: 14,
                                                   color: Colors.grey[600]),

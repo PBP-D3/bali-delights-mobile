@@ -5,8 +5,7 @@ class Chat {
   final int storeId;
   final String storeName;
   final String senderUsername;
-  final String lastMessageTime;
-  final String lastMessageContent;
+  final Map<String, dynamic>? lastMessage;  // Changed to match Django response
   final String storePhotoUrl;
 
   Chat({
@@ -14,8 +13,7 @@ class Chat {
     required this.storeId,
     required this.storeName,
     required this.senderUsername,
-    required this.lastMessageTime,
-    required this.lastMessageContent,
+    required this.lastMessage,
     required this.storePhotoUrl,
   });
 
@@ -25,10 +23,14 @@ class Chat {
       id: json['id'],
       storeId: store['id'] ?? 0,
       storeName: store['name'] ?? '',
-      senderUsername: json['user']?['username'] ?? '',
-      lastMessageTime: json['last_message_time'] ?? '',
-      lastMessageContent: json['last_message_content'] ?? '',
+      senderUsername: json['sender']?['username'] ?? '',
+      lastMessage: json['last_message'],  // Direct from Django response
       storePhotoUrl: store['photo_url'] ?? '',
     );
+  }
+
+  String getLastMessagePreview() {
+    if (lastMessage == null) return "No messages yet";
+    return "${lastMessage!['content'] ?? 'No content'} - ${lastMessage!['timestamp'] ?? ''}";
   }
 }
