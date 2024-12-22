@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'api_service.dart'; // Pastikan path ke ApiService benar
+import 'package:provider/provider.dart';
+import 'package:bali_delights_mobile/constants.dart';
 import 'package:bali_delights_mobile/chats/models/message.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'edit_message_modal.dart';
 
 class ChatDetailScreen extends StatefulWidget {
@@ -28,10 +30,14 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     setState(() {
       _loading = true;
     });
+    final request = context.watch<CookieRequest>();
     try {
-      final msgs = await ApiService.fetchMessages(widget.chatId);
+      final response = await request
+          .get('${Constants.baseUrl}/api/chats/${widget.chatId}/messages/');
       setState(() {
-        _messages = msgs;
+        _messages = (response['messages'] as List)
+            .map((json) => Message.fromJson(json))
+            .toList();
       });
     } catch (e) {
       debugPrint('Error loading messages: $e');
@@ -46,12 +52,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    final success = await ApiService.sendMessage(widget.chatId, text);
-    if (success) {
-      _controller.clear();
-      loadMessages();
-    } else {
-      debugPrint('Failed to send message');
+    final request = context.watch<CookieRequest>();
+    try {
+      final response = await request
+          .post('${Constants.baseUrl}/api/chats/${widget.chatId}/send/', {
+        'message': text,
+      });
+      if (response['success']) {
+        _controller.clear();
+        loadMessages();
+      } else {
+        debugPrint('Failed to send message');
+      }
+    } catch (e) {
+      debugPrint('Error sending message: $e');
     }
   }
 
@@ -59,16 +73,23 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => EditMessageModal(
-        messageId: messageId, // Tambahkan messageId
+        messageId: messageId,
         initialContent: currentContent,
         onSave: (updatedContent) async {
-          final success =
-              await ApiService.editMessage(messageId, updatedContent);
-          if (success) {
-            Navigator.pop(ctx);
-            loadMessages();
-          } else {
-            debugPrint('Failed to edit message');
+          final request = context.watch<CookieRequest>();
+          try {
+            final response = await request
+                .post('${Constants.baseUrl}/api/messages/$messageId/edit/', {
+              'content': updatedContent,
+            });
+            if (response['success']) {
+              Navigator.pop(ctx);
+              loadMessages();
+            } else {
+              debugPrint('Failed to edit message');
+            }
+          } catch (e) {
+            debugPrint('Error editing message: $e');
           }
         },
       ),
@@ -77,9 +98,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const storeName = "StoreName"; // Ganti dengan nama toko yang sebenarnya
-    const custName = null; // Ubah dengan nama customer jika ada
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -116,16 +134,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(50),
                         child: Image.network(
-                          'https://via.placeholder.com/40', // Ganti dengan URL gambar toko
+                          'https://via.placeholder.com/40', // Replace with actual store image URL
                           width: 32,
                           height: 32,
                           fit: BoxFit.cover,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        custName ?? storeName,
-                        style: const TextStyle(
+                      const Text(
+                        "Store Name", // Replace with actual store name
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
                           color: Colors.grey,
@@ -149,8 +167,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final msg = _messages[index];
-                          const senderIsUser =
-                              true; // Atur sesuai logika autentikasi
+                          final senderIsUser = msg.senderIsUser;
                           return GestureDetector(
                             onLongPress: () =>
                                 showEditModal(msg.id, msg.content),

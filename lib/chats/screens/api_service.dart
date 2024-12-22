@@ -20,6 +20,7 @@ class ApiService {
     final url = Uri.parse('$baseUrl/api/chats/');
     final response = await http.get(url, headers: headers);
 
+    print(response.body);
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as Map<String, dynamic>;
       final chatsJson = data['chats'] ?? [];
@@ -33,8 +34,8 @@ class ApiService {
       {String? searchQuery}) async {
     final uri =
         Uri.parse('$baseUrl/stores/show_json/').replace(queryParameters: {
-          if (searchQuery != null) 'search': searchQuery,
-        });
+      if (searchQuery != null) 'search': searchQuery,
+    });
 
     final response = await http.get(uri, headers: {
       'Authorization':

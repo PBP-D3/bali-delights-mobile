@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart'; // Pastikan path ke ApiService benar
+import 'package:provider/provider.dart';
+import 'package:bali_delights_mobile/constants.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class DeleteChatModal extends StatelessWidget {
   final int chatId;
@@ -12,11 +14,13 @@ class DeleteChatModal extends StatelessWidget {
   }) : super(key: key);
 
   Future<void> _deleteChat(BuildContext context) async {
+    final request = context.watch<CookieRequest>();
     try {
-      final success = await ApiService.deleteChat(chatId);
-      if (success) {
+      final response = await request
+          .post('${Constants.baseUrl}/api/chats/$chatId/delete/', {});
+      if (response['success']) {
         onDeleteSuccess();
-        Navigator.pop(context); // Tutup modal setelah sukses
+        Navigator.pop(context); // Close modal after success
       } else {
         _showErrorDialog(context, "Failed to delete chat. Please try again.");
       }
@@ -55,10 +59,7 @@ class DeleteChatModal extends StatelessWidget {
           child: const Text('Cancel'),
         ),
         TextButton(
-          onPressed: () {
-            // Implement delete functionality here
-            onDeleteSuccess();
-          },
+          onPressed: () => _deleteChat(context),
           child: const Text('Delete', style: TextStyle(color: Colors.red)),
         ),
       ],

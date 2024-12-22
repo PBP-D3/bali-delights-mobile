@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import '../services/api_service.dart';
+import 'api_service.dart';
 import '../models/chat.dart';
 import 'chat_detail_screen.dart';
 import 'delete_chat_modal.dart';
@@ -38,11 +38,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
       _loading = true;
     });
 
+    final request = context.watch<CookieRequest>();
     try {
-      final chats = await ApiService.fetchChats();
-      setState(() {
-        _chats = chats;
-      });
+      // Using the correct endpoint from urls.py
+      final response = await request.get('${Constants.baseUrl}/chats/');
+      
+      if (response is List) {
+        setState(() {
+          _chats = response.map((json) => Chat.fromJson(json)).toList();
+        });
+      } else {
+        debugPrint('Unexpected response format');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading chats: $e')),
@@ -55,7 +62,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 
   Future<void> fetchStores() async {
-    final request = context.read<CookieRequest>();
+    final request = context.watch<CookieRequest>();
     try {
       final response = await request.get('${Constants.baseUrl}/stores/json/');
       List<Store> stores = [];
@@ -106,6 +113,28 @@ class _ChatListScreenState extends State<ChatListScreen> {
         builder: (_) => StoreDetailScreen(storeId: storeId),
       ),
     );
+  }
+
+  void navigateToChat(int storeId) async {
+    final request = context.read<CookieRequest>();
+    try {
+      // Using create_chat endpoint from urls.py
+      final response = await request.post(
+        '${Constants.baseUrl}/chats/api/chats/create/',
+        {'store_id': storeId.toString()}
+      );
+
+      if (response['success'] && context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatDetailScreen(chatId: response['chat_id']),
+          ),
+        ).then((_) => loadChats()); // Refresh chat list after returning
+      }
+    } catch (e) {
+      debugPrint('Error creating chat: $e');
+    }
   }
 
   @override
@@ -235,9 +264,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                       children: [
                                         if (userRole != 'shop_owner')
                                           GestureDetector(
-                                            onTap: () => navigateToStoreDetail(1),
+                                            onTap: () =>
+                                                navigateToStoreDetail(1),
                                             child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(50),
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
                                               child: Image.network(
                                                 chat.storeName.isNotEmpty
                                                     ? 'https://via.placeholder.com/40'
@@ -266,7 +297,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              "Last message at ${chat.createdAt}",
+                                              "Last message at ${chat.lastMessageTime}",
                                               style: TextStyle(
                                                   fontSize: 14,
                                                   color: Colors.grey[600]),
