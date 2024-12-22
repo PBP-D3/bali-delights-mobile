@@ -7,13 +7,13 @@ import 'dart:convert';
 class CreateReviewScreen extends StatefulWidget {
   final int productId;
 
-  CreateReviewScreen({required this.productId});
+  const CreateReviewScreen({super.key, required this.productId});
 
   @override
-  _CreateReviewScreenState createState() => _CreateReviewScreenState();
+  CreateReviewScreenState createState() => CreateReviewScreenState();
 }
 
-class _CreateReviewScreenState extends State<CreateReviewScreen> {
+class CreateReviewScreenState extends State<CreateReviewScreen> {
   final _formKey = GlobalKey<FormState>();
   final _commentController = TextEditingController();
   final _ratingController = TextEditingController();
@@ -35,13 +35,15 @@ class _CreateReviewScreenState extends State<CreateReviewScreen> {
       }),
     );
 
-    if (response['success']) {
-      Navigator.pop(context, true); // Return true to indicate success
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to create review'),
-        backgroundColor: Colors.red,
-      ));
+    if (mounted) {
+      if (response['success']) {
+        Navigator.pop(context, true); // Return true to indicate success
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Failed to create review'),
+          backgroundColor: Colors.red,
+        ));
+      }
     }
   }
 
@@ -49,7 +51,7 @@ class _CreateReviewScreenState extends State<CreateReviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Review'),
+        title: const Text('Create Review'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -60,15 +62,15 @@ class _CreateReviewScreenState extends State<CreateReviewScreen> {
               TextFormField(
                 controller: _commentController,
                 decoration: InputDecoration(
-                labelText: 'Comment',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+                  labelText: 'Comment',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 8.0,
+                  ),
                 ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                  vertical: 8.0,
-                ),
-              ),
                 maxLines: 5, // Set maxLines to a higher value for a larger text box
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -77,18 +79,19 @@ class _CreateReviewScreenState extends State<CreateReviewScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _ratingController,
                 decoration: InputDecoration(
-                labelText: 'Rating',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+                  labelText: 'Rating',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 8.0,
+                  ),
                 ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                  vertical: 8.0,
-                ),
-              ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -101,14 +104,14 @@ class _CreateReviewScreenState extends State<CreateReviewScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _submitReview();
                   }
                 },
-                child: Text('Submit'),
+                child: const Text('Submit'),
               ),
             ],
           ),

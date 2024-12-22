@@ -1,20 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:provider/provider.dart';
 import 'package:bali_delights_mobile/reviews/models/reviews.dart';
 import 'package:bali_delights_mobile/constants.dart';
 
 class EditReviewScreen extends StatefulWidget {
   final Review review;
 
-  EditReviewScreen({required this.review});
+  const EditReviewScreen({super.key, required this.review});
 
   @override
-  _EditReviewScreenState createState() => _EditReviewScreenState();
+  EditReviewScreenState createState() => EditReviewScreenState();
 }
 
-class _EditReviewScreenState extends State<EditReviewScreen> {
+class EditReviewScreenState extends State<EditReviewScreen> {
   final TextEditingController _commentController = TextEditingController();
   final TextEditingController _ratingController = TextEditingController();
   final CookieRequest _cookieRequest = CookieRequest();
@@ -34,13 +33,15 @@ class _EditReviewScreenState extends State<EditReviewScreen> {
         'rating': int.parse(_ratingController.text),
       }),
     );
-    if (response['success']) {
-      Navigator.pop(context, true); // Return true to indicate success
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to edit review'),
-        backgroundColor: Colors.red,
-      ));
+    if (mounted) {
+      if (response['success']) {
+        Navigator.pop(context, true); // Return true to indicate success
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Failed to edit review'),
+          backgroundColor: Colors.red,
+        ));
+      }
     }
   }
 
@@ -48,7 +49,7 @@ class _EditReviewScreenState extends State<EditReviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Review'),
+        title: const Text('Edit Review'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -61,14 +62,14 @@ class _EditReviewScreenState extends State<EditReviewScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12.0,
                   vertical: 8.0,
                 ),
               ),
               maxLines: 5, // Set the maxLines to make the input form bigger
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             TextFormField(
               controller: _ratingController,
               decoration: InputDecoration(
@@ -76,17 +77,17 @@ class _EditReviewScreenState extends State<EditReviewScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12.0,
                   vertical: 8.0,
                 ),
               ),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: editReview,
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         ),

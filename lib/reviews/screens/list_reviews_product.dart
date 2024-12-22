@@ -12,13 +12,13 @@ import 'create_reviews.dart';
 class ReviewScreen extends StatefulWidget {
   final int productId;
 
-  ReviewScreen({required this.productId});
+  const ReviewScreen({super.key, required this.productId});
 
   @override
-  _ReviewScreenState createState() => _ReviewScreenState();
+  ReviewScreenState createState() => ReviewScreenState();
 }
 
-class _ReviewScreenState extends State<ReviewScreen> {
+class ReviewScreenState extends State<ReviewScreen> {
   late Future<ReviewResponse> futureReviews;
   final CookieRequest _cookieRequest = CookieRequest();
   int? selectedRating;
@@ -57,17 +57,18 @@ class _ReviewScreenState extends State<ReviewScreen> {
       jsonEncode({}),
     );
 
-    if (response['liked'] != null && response['like_count'] != null) {
-      setState(() {
-        review.likedByUser = response['liked'];
-        review.totalLikes = response['like_count'];
-      });
-    } else {
-      // Handle error
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to like/unlike review'),
-        backgroundColor: Colors.red,
-      ));
+    if (mounted) {
+      if (response['liked'] != null && response['like_count'] != null) {
+        setState(() {
+          review.likedByUser = response['liked'];
+          review.totalLikes = response['like_count'];
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Failed to like/unlike review'),
+          backgroundColor: Colors.red,
+        ));
+      }
     }
   }
 
@@ -75,7 +76,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product Reviews'),
+        title: const Text('Product Reviews'),
       ),
       body: FutureBuilder<ReviewResponse>(
         future: futureReviews,
@@ -84,7 +85,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
             final product = snapshot.data!.product;
             final reviews = snapshot.data!.reviews;
             final userReviewExists = snapshot.data!.userReviewExists;
-            print(snapshot.data!.userReviewExists);
             List<Review> filteredReviews = reviews;
             if (selectedRating != null && selectedRating != 0) {
               filteredReviews = reviews.where((review) => review.rating == selectedRating).toList();
@@ -100,14 +100,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
               children: [
                 // Product Image and Name
                 Container(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
                       Image.network(product.image, height: 100, fit: BoxFit.cover),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Text(
                         product.name,
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -139,14 +139,14 @@ class _ReviewScreenState extends State<ReviewScreen> {
                               });
                             }
                           },
-                          child: Text('Create Review'),
+                          child: const Text('Create Review'),
                         ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       ElevatedButton(
                         onPressed: () {
                           // TODO: routing to product detail screen
                         },
-                        child: Text('View Product'),
+                        child: const Text('View Product'),
                       ),
                     ],
                   ),
@@ -159,16 +159,15 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     children: [
                       // Filter by Rating
                       DropdownButton<int>(
-                        hint: Text('Filter by Rating'),
+                        hint: const Text('Filter by Rating'),
                         value: selectedRating,
                         items: [
-                          DropdownMenuItem(value: 0, child: Text('Show All')),
+                          const DropdownMenuItem(value: 0, child: Text('Show All')),
                           ...List.generate(5, (index) => index + 1)
                               .map((rating) => DropdownMenuItem(
                                     value: rating,
                                     child: Text('$rating Stars'),
-                                  ))
-                              .toList(),
+                                  )),
                         ],
                         onChanged: (value) {
                           setState(() {
@@ -177,7 +176,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                           applyFilters();
                         },
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       // Sort by Likes
                       ElevatedButton(
                         onPressed: () {
@@ -211,7 +210,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text("${snapshot.error}"));
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

@@ -7,14 +7,14 @@ class ReviewCard extends StatelessWidget {
   final Function(int) onDelete;
   final Function() onEdit;
 
-  ReviewCard({required this.review, required this.onDelete, required this.onEdit});
+  const ReviewCard({super.key, required this.review, required this.onDelete, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(10),
+      margin: const EdgeInsets.all(10),
       child: Padding(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -40,7 +40,7 @@ class ReviewCard extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             // Product Name
             GestureDetector(
               onTap: () {
@@ -53,36 +53,36 @@ class ReviewCard extends StatelessWidget {
               },
               child: Text(
                 review.product.name,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               'Rating: ${review.rating} / 5',
               style: TextStyle(color: Colors.yellow[700]),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Text(review.comment),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Text(
               'Likes: ${review.totalLikes}',
-              style: TextStyle(color: Colors.grey),
+              style: const TextStyle(color: Colors.grey),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Text(
               'Reviewed on: ${review.createdAt.toLocal()}',
-              style: TextStyle(color: Colors.grey),
+              style: const TextStyle(color: Colors.grey),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: Icon(Icons.edit),
+                  icon: const Icon(Icons.edit),
                   onPressed: onEdit,
                 ),
                 IconButton(
-                  icon: Icon(Icons.delete),
+                  icon: const Icon(Icons.delete),
                   onPressed: () {
                     onDelete(review.id);
                   },

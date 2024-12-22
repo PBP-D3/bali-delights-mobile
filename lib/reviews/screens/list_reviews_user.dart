@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:provider/provider.dart';
 import 'package:bali_delights_mobile/reviews/models/reviews.dart';
 import 'package:bali_delights_mobile/constants.dart';
 import 'package:bali_delights_mobile/reviews/screens/edit_reviews.dart';
 import 'package:bali_delights_mobile/reviews/widgets/user_reviews_card.dart';
 
 class UserReviewScreen extends StatefulWidget {
+  const UserReviewScreen({super.key});
+
   @override
-  _UserReviewScreenState createState() => _UserReviewScreenState();
+  UserReviewScreenState createState() => UserReviewScreenState();
 }
 
-class _UserReviewScreenState extends State<UserReviewScreen> {
+class UserReviewScreenState extends State<UserReviewScreen> {
   late Future<List<Review>> futureReviews;
   final CookieRequest _cookieRequest = CookieRequest();
 
@@ -23,13 +24,9 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
 
   Future<List<Review>> fetchUserReviews() async {
     await _cookieRequest.init();
-    print(context.read<CookieRequest>().jsonData);
-    print('Fetching user reviews');
     final response = await _cookieRequest.get('${Constants.baseUrl}/reviews/my-review/json');
-    print(response);
     if (response is Map && response.containsKey('detail') && response['detail'] == 'Authentication credentials were not provided.') {
       // Handle not authenticated
-      print('User is not authenticated');
       return [];
     }
 
@@ -39,16 +36,19 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
 
   Future<void> deleteReview(int reviewId) async {
     final response = await _cookieRequest.post('${Constants.baseUrl}/reviews/delete-review/$reviewId/', {});
-    if (response['success']) {
-      setState(() {
-        futureReviews = fetchUserReviews();
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to delete review'),
-        backgroundColor: Colors.red,
-      ));
+    if (mounted) {
+      if (response['success']) {
+        setState(() {
+          futureReviews = fetchUserReviews();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Failed to delete review'),
+          backgroundColor: Colors.red,
+        ));
+      }
     }
+    
   }
 
   Future<void> refreshReviews() async {
@@ -61,7 +61,7 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Reviews'),
+        title: const Text('My Reviews'),
       ),
       body: FutureBuilder<List<Review>>(
         future: futureReviews,
@@ -90,7 +90,7 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text("${snapshot.error}"));
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
