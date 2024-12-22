@@ -1,3 +1,4 @@
+import 'package:bali_delights_mobile/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:bali_delights_mobile/reviews/screens/list_reviews_product.dart';
 import 'package:http/http.dart' as http;
@@ -19,7 +20,7 @@ class ProductDetailPage extends StatelessWidget {
     }
 
     final response = await http.post(
-      Uri.parse('https://your-api-url.com/carts/add_to_cart/'),
+      Uri.parse('${Constants.baseUrl}/carts/api/add-to-cart/'),
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: {'product_id': productId.toString()},
     );
@@ -47,12 +48,18 @@ class ProductDetailPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (product['get_image'] != null)
+              if (product['photo_url'] != null)
                 Center(
                   child: Image.network(
-                    product['get_image'],
+                    product['photo_url'],
                     height: 200,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.image_not_supported),
+                      );
+                    },
                   ),
                 ),
               SizedBox(height: 16),
