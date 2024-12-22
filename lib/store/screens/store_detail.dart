@@ -6,12 +6,14 @@ import 'package:provider/provider.dart';
 import 'package:bali_delights_mobile/store/screens/edit_store.dart';
 import 'package:bali_delights_mobile/store/screens/store_page.dart';
 import 'package:bali_delights_mobile/product/screens/add_product.dart';
+import 'package:bali_delights_mobile/chats/screens/chat_detail_screen.dart';
 
 class StoreDetailPage extends StatelessWidget {
   final Store store;
   final bool isMyStores;
 
-  const StoreDetailPage({super.key, required this.store, required this.isMyStores});
+  const StoreDetailPage(
+      {super.key, required this.store, required this.isMyStores});
 
   Future<void> editStore(BuildContext context, CookieRequest request) async {
     Navigator.pushReplacement(
@@ -132,7 +134,9 @@ class StoreDetailPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddProductScreen(storeId: store.pk)),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            AddProductScreen(storeId: store.pk)),
                   );
                 },
                 icon: const Icon(Icons.add_shopping_cart),
@@ -147,7 +151,18 @@ class StoreDetailPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatDetailScreen(
+                        storeId: store.pk,
+                        storeName: store.fields.name,
+                        storeImage: store.fields.getImage(),
+                      ),
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.chat),
                 label: const Text('Chat with Store'),
                 style: ElevatedButton.styleFrom(
@@ -165,7 +180,7 @@ class StoreDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Store Details"),

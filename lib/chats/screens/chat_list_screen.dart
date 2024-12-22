@@ -57,7 +57,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     try {
       final request = context.read<CookieRequest>();
       final chats = await ApiService.fetchChats(request);
-      print(chats);
+
       setState(() {
         _chats = chats;
         _filteredChats = chats;
