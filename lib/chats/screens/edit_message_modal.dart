@@ -1,47 +1,99 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import '../services/api_service.dart';
 
 class EditMessageModal extends StatefulWidget {
+  final int messageId;
   final String initialContent;
-  final Function(String updatedContent) onSave;
+  final Function(String) onSave;
 
-  EditMessageModal({required this.initialContent, required this.onSave});
+  const EditMessageModal({
+    Key? key,
+    required this.messageId,
+    required this.initialContent,
+    required this.onSave,
+  }) : super(key: key);
 
   @override
   _EditMessageModalState createState() => _EditMessageModalState();
 }
 
 class _EditMessageModalState extends State<EditMessageModal> {
-  TextEditingController _controller = TextEditingController();
+  late TextEditingController _controller;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _controller.text = widget.initialContent;
+    _controller = TextEditingController(text: widget.initialContent);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSave() async {
+    if (_controller.text.trim().isEmpty) return;
+
+    setState(() => _isLoading = true);
+    final request = context.read<CookieRequest>();
+
+    try {
+      final success = await ApiService.editMessage(
+        request,
+        widget.messageId,
+        _controller.text.trim(),
+      );
+
+      if (success && mounted) {
+        widget.onSave(_controller.text.trim());
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error editing message: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Edit Message", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      title: const Text('Edit Message'),
       content: TextField(
         controller: _controller,
+        decoration: const InputDecoration(
+          hintText: 'Edit your message',
+          border: OutlineInputBorder(),
+        ),
         maxLines: 3,
-        decoration: InputDecoration(border: OutlineInputBorder()),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text("Cancel", style: TextStyle(color: Colors.grey[800])),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: () {
-            final updatedContent = _controller.text.trim();
-            if (updatedContent.isNotEmpty) {
-              widget.onSave(updatedContent);
-            }
-          },
-          child: Text("Save"),
-          style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFC6AC8F)),
+          onPressed: _isLoading ? null : _handleSave,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFC6AC8F),
+          ),
+          child: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Save'),
         ),
       ],
     );

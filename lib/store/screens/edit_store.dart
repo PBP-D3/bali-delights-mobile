@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
@@ -37,13 +39,17 @@ class EditStorePageState extends State<EditStorePage> {
     _name = widget.store.fields.name;
     _location = widget.store.fields.location;
     _description = widget.store.fields.description;
-    _photoUpload = widget.store.fields.photoUpload;
+    _photoUpload = widget.store.fields.photoUpload != null && widget.store.fields.photoUpload!.isNotEmpty
+        ? '${Constants.baseUrl}/media/${widget.store.fields.photoUpload}'
+        : null;
     _photo = widget.store.fields.photo;
-    _choice = _photoUpload != null && _photoUpload!.isNotEmpty ? "upload" : "url";
+
+    if (widget.store.fields.photo != null && widget.store.fields.photo!.isNotEmpty) {
+      _choice = "url";
+    }
   }
 
   Future<void> _pickImage() async {
-    try {
       final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
         if (kIsWeb) {
@@ -57,10 +63,7 @@ class EditStorePageState extends State<EditStorePage> {
           });
         }
       }
-    } catch (e) {
-      print(e);
     }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +79,6 @@ class EditStorePageState extends State<EditStorePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Input Name
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
@@ -101,8 +103,6 @@ class EditStorePageState extends State<EditStorePage> {
                   },
                 ),
               ),
-
-              // Input Location
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
@@ -127,8 +127,6 @@ class EditStorePageState extends State<EditStorePage> {
                   },
                 ),
               ),
-
-              // Input Description
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
@@ -153,8 +151,6 @@ class EditStorePageState extends State<EditStorePage> {
                   },
                 ),
               ),
-
-              // Image Selection Option
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -172,9 +168,7 @@ class EditStorePageState extends State<EditStorePage> {
                           onChanged: (value) {
                             setState(() {
                               _choice = value!;
-                              // Clear URL input when switching to upload
                               _photo = null;
-                              // Clear file input when switching
                               _imageFile = null;
                               _webImage = null;
                             });
@@ -187,13 +181,10 @@ class EditStorePageState extends State<EditStorePage> {
                           onChanged: (value) {
                             setState(() {
                               _choice = value!;
-                              // Clear file inputs when switching to URL
+                              _photoUpload = null;
                               _imageFile = null;
                               _webImage = null;
-                              // Clear URL input
                               _photo = null;
-                              // Also clear the existing photo_upload if any
-                              _photoUpload = null;
                             });
                           },
                         ),
@@ -215,7 +206,6 @@ class EditStorePageState extends State<EditStorePage> {
                       ),
                       const SizedBox(height:
                       8),
-                      // Show new image if selected
                       if (_imageFile != null || _webImage != null)
                         Container(
                           width: 200,
@@ -231,11 +221,11 @@ class EditStorePageState extends State<EditStorePage> {
                                   ? Image.file(_imageFile!)
                                   : const Center(child: Text("No image selected"))),
                         ),
-                      // Show existing image if no new image is selected
                       if (_imageFile == null && 
                           _webImage == null && 
-                          _photoUpload != null &&
-                          _photoUpload!.isNotEmpty)
+                          widget.store.fields.photoUpload != null && 
+                          widget.store.fields.photoUpload!.isNotEmpty &&
+                          _photoUpload != null)
                         Container(
                           width: 200,
                           height: 200,
@@ -265,8 +255,6 @@ class EditStorePageState extends State<EditStorePage> {
                     ],
                   ),
                 ),
-
-              // Input Photo URL
               if (_choice == "url")
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -284,16 +272,9 @@ class EditStorePageState extends State<EditStorePage> {
                         _photo = value;
                       });
                     },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Photo URL cannot be empty!";
-                      }
-                      return null;
-                    },
+                    validator: (value) => null,
                   ),
                 ),
-
-              // Submit Button
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(

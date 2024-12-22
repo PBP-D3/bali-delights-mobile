@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:bali_delights_mobile/store/screens/store_form.dart';
 import 'package:bali_delights_mobile/store/widgets/list_stores.dart';
+import 'package:bali_delights_mobile/main/widgets/navbar.dart';
 
 class StorePage extends StatefulWidget {
   const StorePage({super.key});
 
   @override
-  _StorePageState createState() => _StorePageState();
+  StorePageState createState() => StorePageState();
 }
 
-class _StorePageState extends State<StorePage> {
+class StorePageState extends State<StorePage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   int _selectedIndex = 0;
@@ -37,6 +38,7 @@ class _StorePageState extends State<StorePage> {
             },
           ),
         ),
+        drawer: const NavBar(),
         body: Column(
           children: [
             if (_selectedIndex == 0 || _selectedIndex == 1)
@@ -71,33 +73,5 @@ class _StorePageState extends State<StorePage> {
         ),
       ),
     );
-  }
-}
-
-
-const _tabs = [
-  Tab(icon: Icon(Icons.home_rounded), text: "All Stores"),
-  Tab(icon: Icon(Icons.store), text: "My Stores"),
-  Tab(icon: Icon(Icons.add), text: "Add Store"),
-];
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._content);
-
-  final Widget _content;
-
-  @override
-  double get minExtent => 56.0; // Fixed height for the header
-  @override
-  double get maxExtent => 56.0; // Fixed height for the header
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return _content;
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
   }
 }

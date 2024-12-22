@@ -1,7 +1,10 @@
+import 'package:bali_delights_mobile/constants.dart';
 import 'package:bali_delights_mobile/product/models/product.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import '../widgets/filter_bar.dart';
+import '../widgets/product_card.dart';
 
 class ProductPage extends StatefulWidget {
   @override
@@ -11,104 +14,164 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   List<Product> products = [];
   bool isLoading = true;
+  String? error;
+  String? selectedCategory;
+  String sortOrder = 'asc';
+  
+  final List<Map<String, String>> categories = [
+    {'value': 'Clothes', 'display': 'Clothes'},
+    {'value': 'Jewelries', 'display': 'Jewelries'},
+    {'value': 'Crafts', 'display': 'Crafts'},
+    {'value': 'Arts', 'display': 'Arts'},
+    {'value': 'Snacks', 'display': 'Snacks'},
+    {'value': 'Drinks', 'display': 'Drinks'},
+  ];
 
   @override
   void initState() {
     super.initState();
-    fetchProducts();
+    final request = Provider.of<CookieRequest>(context, listen: false);
+    _loadProducts(request);
   }
 
-  Future<void> fetchProducts() async {
-    final request = context.read<CookieRequest>();
+  Future<void> _loadProducts(CookieRequest request) async {
     try {
-      // Replace with your Django API endpoint
-      final response = await request.get('http://http://127.0.0.1:8000/api/products/');
-
-      if (response['status'] == 'success') {
-        setState(() {
-          products = productFromJson(response['data']);
-          isLoading = false;
-        });
-      } else {
-        throw Exception(response['message']);
-      }
-    } catch (e) {
       setState(() {
+        isLoading = true;
+        error = null;
+      });
+
+      String url = '${Constants.baseUrl}/products/api/products/?sort=$sortOrder';
+      if (selectedCategory != null) {
+        url += '&category=$selectedCategory';
+      }
+
+      final response = await request.get(url);
+
+      if (response == null) {
+        throw Exception('No response from server');
+      }
+
+      if (response is! Map || !response.containsKey('products')) {
+        throw Exception('Invalid response format: missing products key');
+      }
+
+      final productsList = (response['products'] as List).map((item) {
+        final Map<String, dynamic> modifiedItem = {
+          'id': item['id'],
+          'name': item['name'],
+          'description': item['description'],
+          'price': item['price'],
+          'stock': item['stock'],
+          'category': item['category'],
+          'store_id': 1,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+          'photo_url': item['image_url'],
+          'photo_upload': null,
+          'average_rating': item['average_rating'],
+        };
+
+        return Product.fromJson(modifiedItem);
+      }).toList();
+
+      setState(() {
+        products = productsList;
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching products: $e')),
-      );
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Products')),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : products.isEmpty
-              ? Center(child: Text('No products available'))
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 8.0,
-                      crossAxisSpacing: 8.0,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return Card(
-                        child: Column(
-                          children: [
-                            Text(
-                              product.fields.name,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (product.fields.photoUrl.isNotEmpty)
-                              Image.network(
-                                product.fields.photoUrl,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              )
-                            else
-                              Container(
-                                height: 100,
-                                color: Colors.grey[200],
-                                child: Center(child: Text('No image available')),
+      appBar: AppBar(
+        title: Text('Products'),
+        actions: [
+          if (error != null || products.isEmpty)
+            IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: () {
+                final request = Provider.of<CookieRequest>(context, listen: false);
+                _loadProducts(request);
+              },
+            ),
+        ],
+      ),
+      body: Column(
+        children: [
+          FilterBar(
+            selectedCategory: selectedCategory,
+            sortOrder: sortOrder,
+            categories: categories,
+            onCategoryChanged: (value) {
+              setState(() {
+                selectedCategory = value;
+              });
+              final request = Provider.of<CookieRequest>(context, listen: false);
+              _loadProducts(request);
+            },
+            onSortOrderChanged: (value) {
+              setState(() {
+                sortOrder = value;
+              });
+              final request = Provider.of<CookieRequest>(context, listen: false);
+              _loadProducts(request);
+            },
+          ),
+          Expanded(
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : error != null
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Error loading products',
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
-                            Text('Price: \$${product.fields.price}'),
-                            Text('Stock: ${product.fields.stock}'),
-                            Text('Category: ${product.fields.category}'),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    // Add product to cart
-                                  },
-                                  child: Text('Add to Cart'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    // Navigate to reviews
-                                  },
-                                  child: Text('Reviews'),
-                                ),
-                              ],
-                            ),
-                          ],
+                              SizedBox(height: 8),
+                              Text(error!, style: TextStyle(color: Colors.red)),
+                              SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final request = Provider.of<CookieRequest>(context, listen: false);
+                                  _loadProducts(request);
+                                },
+                                child: Text('Retry'),
+                              ),
+                            ],
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      )
+                    : products.isEmpty
+                        ? Center(child: Text('No products available'))
+                        : Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: GridView.builder(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 8.0,
+                                crossAxisSpacing: 8.0,
+                                childAspectRatio: 0.65,
+                              ),
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                return ProductCard(product: products[index]);
+                              },
+                            ),
+                          ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final store = storeFromJson(jsonString);
-
 import 'dart:convert';
 
 import 'package:bali_delights_mobile/constants.dart';
