@@ -1,10 +1,14 @@
 import 'package:bali_delights_mobile/constants.dart';
 import 'package:bali_delights_mobile/product/models/product.dart';
+import 'package:bali_delights_mobile/reviews/screens/list_reviews_product.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import '../widgets/filter_bar.dart';
 import '../widgets/product_card.dart';
+import '../widgets/rating_display.dart';
+import '../widgets/product_image.dart';
+import 'product_detail.dart';
 
 class ProductPage extends StatefulWidget {
   @override
@@ -17,7 +21,7 @@ class _ProductPageState extends State<ProductPage> {
   String? error;
   String? selectedCategory;
   String sortOrder = 'asc';
-  
+
   final List<Map<String, String>> categories = [
     {'value': 'Clothes', 'display': 'Clothes'},
     {'value': 'Jewelries', 'display': 'Jewelries'},
@@ -31,10 +35,10 @@ class _ProductPageState extends State<ProductPage> {
   void initState() {
     super.initState();
     final request = Provider.of<CookieRequest>(context, listen: false);
-    _loadProducts(request);
+    fetchProducts(request);
   }
 
-  Future<void> _loadProducts(CookieRequest request) async {
+  Future<void> fetchProducts(CookieRequest request) async {
     try {
       setState(() {
         isLoading = true;
@@ -57,22 +61,7 @@ class _ProductPageState extends State<ProductPage> {
       }
 
       final productsList = (response['products'] as List).map((item) {
-        final Map<String, dynamic> modifiedItem = {
-          'id': item['id'],
-          'name': item['name'],
-          'description': item['description'],
-          'price': item['price'],
-          'stock': item['stock'],
-          'category': item['category'],
-          'store_id': 1,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-          'photo_url': item['image_url'],
-          'photo_upload': null,
-          'average_rating': item['average_rating'],
-        };
-
-        return Product.fromJson(modifiedItem);
+        return Product.fromJson(item);
       }).toList();
 
       setState(() {
@@ -87,21 +76,27 @@ class _ProductPageState extends State<ProductPage> {
     }
   }
 
+  void onCategoryChanged(String? category) {
+    setState(() {
+      selectedCategory = category;
+    });
+    final request = Provider.of<CookieRequest>(context, listen: false);
+    fetchProducts(request);
+  }
+
+  void onSortOrderChanged(String order) {
+    setState(() {
+      sortOrder = order;
+    });
+    final request = Provider.of<CookieRequest>(context, listen: false);
+    fetchProducts(request);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Products'),
-        actions: [
-          if (error != null || products.isEmpty)
-            IconButton(
-              icon: Icon(Icons.refresh),
-              onPressed: () {
-                final request = Provider.of<CookieRequest>(context, listen: false);
-                _loadProducts(request);
-              },
-            ),
-        ],
       ),
       body: Column(
         children: [
@@ -109,66 +104,30 @@ class _ProductPageState extends State<ProductPage> {
             selectedCategory: selectedCategory,
             sortOrder: sortOrder,
             categories: categories,
-            onCategoryChanged: (value) {
-              setState(() {
-                selectedCategory = value;
-              });
-              final request = Provider.of<CookieRequest>(context, listen: false);
-              _loadProducts(request);
-            },
-            onSortOrderChanged: (value) {
-              setState(() {
-                sortOrder = value;
-              });
-              final request = Provider.of<CookieRequest>(context, listen: false);
-              _loadProducts(request);
-            },
+            onCategoryChanged: onCategoryChanged,
+            onSortOrderChanged: onSortOrderChanged,
           ),
           Expanded(
             child: isLoading
                 ? Center(child: CircularProgressIndicator())
-                : error != null
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Error loading products',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 8),
-                              Text(error!, style: TextStyle(color: Colors.red)),
-                              SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  final request = Provider.of<CookieRequest>(context, listen: false);
-                                  _loadProducts(request);
-                                },
-                                child: Text('Retry'),
-                              ),
-                            ],
+                : products.isEmpty
+                    ? Center(child: Text('No products available'))
+                    : Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: GridView.builder(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 8.0,
+                            crossAxisSpacing: 8.0,
+                            childAspectRatio: 0.75,
                           ),
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            final product = products[index];
+                            return ProductCard(product: product);
+                          },
                         ),
-                      )
-                    : products.isEmpty
-                        ? Center(child: Text('No products available'))
-                        : Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: GridView.builder(
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                mainAxisSpacing: 8.0,
-                                crossAxisSpacing: 8.0,
-                                childAspectRatio: 0.65,
-                              ),
-                              itemCount: products.length,
-                              itemBuilder: (context, index) {
-                                return ProductCard(product: products[index]);
-                              },
-                            ),
-                          ),
+                      ),
           ),
         ],
       ),

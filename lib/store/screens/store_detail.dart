@@ -1,14 +1,16 @@
 import 'package:bali_delights_mobile/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:bali_delights_mobile/store/model/store.dart';
+import 'package:bali_delights_mobile/store/model/store.dart' as store_model;
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:bali_delights_mobile/store/screens/edit_store.dart';
 import 'package:bali_delights_mobile/store/screens/store_page.dart';
 import 'package:bali_delights_mobile/product/screens/add_product.dart';
+import 'package:bali_delights_mobile/product/widgets/product_card.dart';
+import 'package:bali_delights_mobile/product/models/product.dart';
 
 class StoreDetailPage extends StatelessWidget {
-  final Store store;
+  final store_model.Store store;
   final bool isMyStores;
 
   const StoreDetailPage({super.key, required this.store, required this.isMyStores});
@@ -37,6 +39,14 @@ class StoreDetailPage extends StatelessWidget {
         const SnackBar(content: Text('Failed to delete the store')),
       );
     }
+  }
+
+  Future<List<Product>> fetchStoreProducts(CookieRequest request) async {
+    final response = await request.get('${Constants.baseUrl}/products/api/stores/${store.pk}/products/');
+    if (response == null || response is! Map || !response.containsKey('products')) {
+      throw Exception('Failed to load products');
+    }
+    return (response['products'] as List).map<Product>((json) => Product.fromJson(json)).toList();
   }
 
   Widget _buildImage() {
@@ -142,7 +152,7 @@ class StoreDetailPage extends StatelessWidget {
                   foregroundColor: Colors.white,
                 ),
               ),
-            )
+            ),
           ] else ...[
             SizedBox(
               width: double.infinity,
@@ -157,6 +167,35 @@ class StoreDetailPage extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 24),
+          FutureBuilder<List<Product>>(
+            future: fetchStoreProducts(request),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('No products available'));
+              } else {
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 8.0,
+                    crossAxisSpacing: 8.0,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    final product = snapshot.data![index];
+                    return ProductCard(product: product, isEditable: isMyStores);
+                  },
+                );
+              }
+            },
+          ),
         ],
       ),
     );

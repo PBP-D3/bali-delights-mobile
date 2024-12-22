@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Product {
   final int id;
   final String name;
@@ -7,12 +5,8 @@ class Product {
   final double price;
   final int stock;
   final String category;
-  final int storeId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final String? photoUrl;
-  final String? photoUpload;
-  final double? averageRating;  // New field
+  final String photoUrl;
+  final double? averageRating;
 
   Product({
     required this.id,
@@ -21,12 +15,8 @@ class Product {
     required this.price,
     required this.stock,
     required this.category,
-    required this.storeId,
-    required this.createdAt,
-    required this.updatedAt,
-    this.photoUrl,
-    this.photoUpload,
-    this.averageRating,  
+    required this.photoUrl,
+    this.averageRating,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -37,22 +27,29 @@ class Product {
       price: double.parse(json['price'].toString()),
       stock: json['stock'],
       category: json['category'],
-      storeId: json['store_id'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
       photoUrl: json['photo_url'],
-      photoUpload: json['photo_upload'],
-      averageRating: json['average_rating'] != null 
-          ? double.parse(json['average_rating'].toString()) 
-          : null,  
+      averageRating: json['average_rating'] != null
+          ? double.parse(json['average_rating'].toString())
+          : null,
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'price': price,
+      'stock': stock,
+      'category': category,
+      'photo_url': photoUrl,
+      'average_rating': averageRating,
+    };
+  }
+
   String getImage() {
-    if (photoUrl != null) {
-      return photoUrl!;
-    } else if (photoUpload != null) {
-      return photoUpload!;
+    if (photoUrl.isNotEmpty) {
+      return photoUrl;
     }
     return "https://img.freepik.com/premium-vector/shop-vector-design-white-background_917213-257003.jpg?semt=ais_hybrid";
   }

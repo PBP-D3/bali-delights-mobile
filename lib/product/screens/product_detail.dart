@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bali_delights_mobile/reviews/screens/list_reviews_product.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:bali_delights_mobile/product/models/product.dart';
 
 class ProductDetailPage extends StatelessWidget {
   final Map<String, dynamic> product;
