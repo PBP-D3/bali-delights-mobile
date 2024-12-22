@@ -1,6 +1,6 @@
 class Constants {
   // do not change this ever again
-  static const String baseUrl = 'http://127.0.0.1:8000';
+  static const String baseUrl = 'https://muhammad-azzam31-balidelights.pbp.cs.ui.ac.id';
 
   // Auth endpoints
   static String loginUrl = '$baseUrl/api/login/';
