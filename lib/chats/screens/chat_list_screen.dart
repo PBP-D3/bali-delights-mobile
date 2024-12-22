@@ -19,6 +19,7 @@ class ChatListScreen extends StatefulWidget {
 class _ChatListScreenState extends State<ChatListScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<Chat> _chats = [];
+  List<Chat> _filteredChats = [];
   bool _loading = true;
   List<Store> _stores = [];
 
@@ -30,6 +31,24 @@ class _ChatListScreenState extends State<ChatListScreen> {
     super.initState();
     loadChats();
     fetchStores();
+    _searchController.addListener(_filterChats);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterChats() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredChats = _chats.where((chat) {
+        final storeName = chat.storeName.toLowerCase();
+        final lastMessage = chat.lastMessage?['content']?.toString().toLowerCase() ?? '';
+        return storeName.contains(query) || lastMessage.contains(query);
+      }).toList();
+    });
   }
 
   Future<void> loadChats() async {
@@ -39,7 +58,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
       final request = context.read<CookieRequest>();
       final chats = await ApiService.fetchChats(request);
       print(chats);
-      setState(() => _chats = chats);
+      setState(() {
+        _chats = chats;
+        _filteredChats = chats;
+      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -74,11 +96,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
   void openAddChatModal() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) {
         return AddChatModal(
           stores: _stores,
-          onChatCreated: (storeId) {
-            loadChats();
+          onChatCreated: (storeId) async {
+            final store = _stores.firstWhere((s) => s.pk == storeId);
+            
+            // Close modal
+            Navigator.pop(ctx);
+            
+            // Navigate to chat detail
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChatDetailScreen(
+                    storeId: storeId,
+                    storeName: store.fields.name,
+                    storeImage: store.fields.getImage(),
+                  ),
+                ),
+              ).then((_) => loadChats()); // Reload chats when returning from detail screen
+            }
           },
         );
       },
@@ -91,8 +131,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       builder: (ctx) => DeleteChatModal(
         chatId: chatId,
         onDeleteSuccess: () {
-          Navigator.pop(context);
-          loadChats();
+          Navigator.pop(ctx); // Only close the modal
+          loadChats(); // Refresh the chat list
         },
       ),
     );
@@ -187,20 +227,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 Expanded(
                   child: _loading
                       ? const Center(child: CircularProgressIndicator())
-                      : _chats.isEmpty
+                      : _filteredChats.isEmpty
                           ? Center(
                               child: Text(
-                                userRole == "shop_owner"
-                                    ? "No chats yet. You will see messages here when customers reach out to you."
-                                    : "No chats. Start a chat with your favorite merchant!",
+                                _chats.isEmpty
+                                    ? (userRole == "shop_owner"
+                                        ? "No chats yet. You will see messages here when customers reach out to you."
+                                        : "No chats. Start a chat with your favorite merchant!")
+                                    : "No chats found matching your search.",
                                 style: TextStyle(color: Colors.grey[600]),
                                 textAlign: TextAlign.center,
                               ),
                             )
                           : ListView.builder(
-                              itemCount: _chats.length,
+                              itemCount: _filteredChats.length,
                               itemBuilder: (context, index) {
-                                final chat = _chats[index];
+                                final chat = _filteredChats[index];
                                 return GestureDetector(
                                   onLongPress: () => showDeleteOption(chat.id),
                                   onTap: () {
@@ -210,8 +252,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                         builder: (_) => ChatDetailScreen(
                                           storeId: chat.storeId,
                                           storeName: chat.storeName,
-                                          storeImage:
-                                              'https://via.placeholder.com/40',
+                                          storeImage: chat.storePhotoUrl,
                                         ),
                                       ),
                                     );
@@ -232,9 +273,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(50),
                                             child: Image.network(
-                                              chat.storeName.isNotEmpty
-                                                  ? 'https://via.placeholder.com/40'
-                                                  : 'https://via.placeholder.com/40',
+                                              chat.storePhotoUrl,
                                               width: 40,
                                               height: 40,
                                               fit: BoxFit.cover,

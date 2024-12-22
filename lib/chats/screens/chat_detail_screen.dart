@@ -39,23 +39,15 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     setState(() => _loading = true);
     try {
       final request = context.read<CookieRequest>();
-
       final chatResult =
           await ApiService.getOrCreateChat(request, widget.storeId);
 
       if (chatResult['success']) {
+        final currentUserId = chatResult['user']?['id'];
         setState(() {
           _chatId = chatResult['chat_id'];
           if (chatResult['messages'] != null) {
-            // Add user_id to each message for proper sender identification
-            final userId = chatResult['user']['id'];
-            final List<dynamic> messages = chatResult['messages'];
-            _messages = messages
-                .map((msg) => Message.fromJson({
-                      ...msg,
-                      'user_id': userId, // Add user_id to the message JSON
-                    }))
-                .toList();
+            loadMessages();
           }
         });
       }
@@ -79,16 +71,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       final request = context.read<CookieRequest>();
       final response = await ApiService.fetchMessages(request, _chatId!);
 
-      // Get user ID from the response
-      final userId = response['user']['id'];
-
-      if (mounted) {
+      if (mounted && response['messages'] != null) {
+        final currentUserId = response['user']?['id'];
+        final List<dynamic> messagesJson = response['messages'];
         setState(() {
-          _messages = (response['messages'] as List)
-              .map((msg) => Message.fromJson({
-                    ...msg,
-                    'user_id': userId, // Add user_id to each message
-                  }))
+          _messages = messagesJson
+              .map((msg) => Message.fromJson(msg, currentUserId))
               .toList();
         });
       }
@@ -108,7 +96,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       final success = await ApiService.sendMessage(request, _chatId!, text);
       if (success) {
         _controller.clear();
-        loadMessages();
+        await loadMessages(); // Use await here
       }
     } catch (e) {
       debugPrint('Error sending message: $e');
@@ -122,8 +110,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         messageId: messageId,
         initialContent: currentContent,
         onSave: (updatedContent) async {
-          final request =
-              context.read<CookieRequest>(); // Changed from watch to read
+          final request = context.read<CookieRequest>();
           try {
             final success = await ApiService.editMessage(
               request,
@@ -131,8 +118,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               updatedContent,
             );
             if (success && mounted) {
-              Navigator.pop(ctx);
-              loadMessages();
+              Navigator.pop(ctx); // Only close the modal
+              loadMessages(); // Refresh messages
             }
           } catch (e) {
             debugPrint('Error editing message: $e');

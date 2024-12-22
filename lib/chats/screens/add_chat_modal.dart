@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:bali_delights_mobile/store/model/store.dart';
+import '../services/api_service.dart';
 
 class AddChatModal extends StatefulWidget {
   final Function(int storeId) onChatCreated;
@@ -18,6 +21,7 @@ class AddChatModal extends StatefulWidget {
 class _AddChatModalState extends State<AddChatModal> {
   final TextEditingController _searchCtrl = TextEditingController();
   List<Store> _filteredStores = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -31,6 +35,31 @@ class _AddChatModalState extends State<AddChatModal> {
         return store.fields.name.toLowerCase().contains(query.toLowerCase());
       }).toList();
     });
+  }
+
+  Future<void> _createChat(int storeId) async {
+    setState(() => _isLoading = true);
+    try {
+      final request = context.read<CookieRequest>();
+      final result = await ApiService.createChat(request, storeId);
+      
+      if (result['success']) {
+        if (mounted) {
+          widget.onChatCreated(storeId);
+        }
+      }
+    } catch (e) {
+      print('Error creating chat: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating chat: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -66,39 +95,38 @@ class _AddChatModalState extends State<AddChatModal> {
                   const SizedBox(height: 16),
                   Container(
                     height: 200,
-                    child: _filteredStores.isEmpty
-                        ? const Center(child: Text("No stores found."))
-                        : ListView.builder(
-                            itemCount: _filteredStores.length,
-                            itemBuilder: (context, index) {
-                              final store = _filteredStores[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  widget.onChatCreated(store.pk);
-                                  Navigator.pop(context);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundImage: NetworkImage(
-                                          store.fields.getImage(),
-                                        ),
+                    child: _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _filteredStores.isEmpty
+                            ? const Center(child: Text("No stores found."))
+                            : ListView.builder(
+                                itemCount: _filteredStores.length,
+                                itemBuilder: (context, index) {
+                                  final store = _filteredStores[index];
+                                  return GestureDetector(
+                                    onTap: () => _createChat(store.pk),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      margin: const EdgeInsets.only(bottom: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[100],
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                      const SizedBox(width: 12),
-                                      Text(store.fields.name),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                                      child: Row(
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundImage: NetworkImage(
+                                              store.fields.getImage(),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(store.fields.name),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                   ),
                 ],
               ),

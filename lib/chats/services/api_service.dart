@@ -35,16 +35,20 @@ class ApiService {
 
   static Future<Map<String, dynamic>> createChat(
       CookieRequest request, int storeId) async {
-    // Matches create_chat view in Django
+    print('Creating chat with store ID: $storeId'); // Debug log
+    
     final response = await request.post(
-        '${Constants.baseUrl}/chats/api/chats/create/',
-        {'store_id': storeId.toString()});
-
+      '${Constants.baseUrl}/chats/api/chats/create/',
+      {'store_id': storeId.toString()}
+    );
+    
+    print('Create chat response: $response'); // Debug log
+    
     if (response != null) {
       return {
-        'success': response['success'] ?? false,
-        'store_id': response['store_id'], // Django view returns store_id
-        'chat_id': response['chat_id'] ?? 0, // Added for chat initialization
+        'success': true,
+        'chat_id': response['chat_id'],  // Changed from store_id to chat_id
+        'store_id': storeId,
       };
     } else {
       throw Exception('Failed to create chat');
@@ -53,16 +57,19 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getOrCreateChat(
       CookieRequest request, int storeId) async {
-    // Matches chat_with_store_json view in Django
     final response = await request
         .get('${Constants.baseUrl}/chats/api/chats/$storeId/view/');
 
     if (response != null) {
+      final userId = response['user']?['id'];
+      final messages = response['messages'] as List<dynamic>;
+      
       return {
         'success': true,
         'chat_id': response['chat_id'],
         'store': response['store'],
-        'messages': response['messages'],
+        'user': response['user'],
+        'messages': messages,
       };
     } else {
       throw Exception('Failed to initialize chat');
