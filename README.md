@@ -6,6 +6,9 @@ Github: https://github.com/PBP-D3/bali-delights
 
 Deployment: [http://pbp.cs.ui.ac.id/muhammad.azzam31/balidelights](http://muhammad-azzam31-balidelights.pbp.cs.ui.ac.id)
 
+## Video Promosi: https://www.youtube.com/watch?v=HuAKJ8tmobM
+
+
 ## I. Anggota:
 
 1. Muhammad Azzam / 2306220444
