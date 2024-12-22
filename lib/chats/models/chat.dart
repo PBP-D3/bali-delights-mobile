@@ -2,35 +2,35 @@ import 'message.dart';
 
 class Chat {
   final int id;
-  final int sender;
-  final String senderUsername;
-  final int store;
+  final int storeId;
   final String storeName;
-  final String createdAt;
-  final List<Message> messages;
+  final String senderUsername;
+  final Map<String, dynamic>? lastMessage; // Changed to match Django response
+  final String storePhotoUrl;
 
   Chat({
     required this.id,
-    required this.sender,
-    required this.senderUsername,
-    required this.store,
+    required this.storeId,
     required this.storeName,
-    required this.createdAt,
-    required this.messages,
+    required this.senderUsername,
+    required this.lastMessage,
+    required this.storePhotoUrl,
   });
 
   factory Chat.fromJson(Map<String, dynamic> json) {
-    List messagesJson = json['messages'] ?? [];
-    List<Message> msgList = messagesJson.map((m) => Message.fromJson(m)).toList();
-
+    final store = json['store'] ?? {};
     return Chat(
       id: json['id'],
-      sender: json['sender'],
-      senderUsername: json['sender_username'],
-      store: json['store'],
-      storeName: json['store_name'],
-      createdAt: json['created_at'],
-      messages: msgList,
+      storeId: store['id'] ?? 0,
+      storeName: store['name'] ?? '',
+      senderUsername: json['sender']?['username'] ?? '',
+      lastMessage: json['last_message'], // Direct from Django response
+      storePhotoUrl: store['photo_url'] ?? '',
     );
+  }
+
+  String getLastMessagePreview() {
+    if (lastMessage == null) return "No messages yet";
+    return "last message: ${lastMessage!['content'] ?? 'No content'}";
   }
 }
