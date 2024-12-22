@@ -1,22 +1,22 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../api_service.dart';
+import '../../api_service.dart'; // Pastikan path ke ApiService benar
 import '../../models/message.dart';
 import 'edit_message_modal.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final int chatId;
 
-  ChatDetailScreen({required this.chatId});
+  const ChatDetailScreen({required this.chatId, Key? key}) : super(key: key);
 
   @override
   _ChatDetailScreenState createState() => _ChatDetailScreenState();
 }
 
 class _ChatDetailScreenState extends State<ChatDetailScreen> {
+  final TextEditingController _controller = TextEditingController();
   List<Message> _messages = [];
   bool _loading = true;
-  TextEditingController _controller = TextEditingController();
-  int? currentMessageId;
 
   @override
   void initState() {
@@ -25,17 +25,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   }
 
   Future<void> loadMessages() async {
+    setState(() {
+      _loading = true;
+    });
     try {
       final msgs = await ApiService.fetchMessages(widget.chatId);
       setState(() {
         _messages = msgs;
-        _loading = false;
       });
     } catch (e) {
+      debugPrint('Error loading messages: $e');
+    } finally {
       setState(() {
         _loading = false;
       });
-      print('Error loading messages: $e');
     }
   }
 
@@ -48,7 +51,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       _controller.clear();
       loadMessages();
     } else {
-      print('Failed to send message');
+      debugPrint('Failed to send message');
     }
   }
 
@@ -56,15 +59,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => EditMessageModal(
+        messageId: messageId, // Tambahkan messageId
         initialContent: currentContent,
         onSave: (updatedContent) async {
-          // Panggil endpoint edit message di sini
-          // Karena kita belum buat endpoint edit disini, asumsikan sukses
-          // Untuk implementasi sebenarnya, gunakan ApiService serupa sendMessage.
-          // Setelah sukses, refresh messages:
-          // await ApiService.editMessage(messageId, updatedContent);
-          Navigator.pop(ctx);
-          loadMessages();
+          final success = await ApiService.editMessage(messageId, updatedContent);
+          if (success) {
+            Navigator.pop(ctx);
+            loadMessages();
+          } else {
+            debugPrint('Failed to edit message');
+          }
         },
       ),
     );
@@ -72,60 +76,62 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Beberapa variabel tiruan untuk meniru template:
-    String storeName = "StoreName"; // Ganti dengan data store sebenarnya
-    String? custName = null; // Jika null, pakai storeName
+    const storeName = "StoreName"; // Ganti dengan nama toko yang sebenarnya
+    const custName = null; // Ubah dengan nama customer jika ada
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header mirip chat_personal.html
+            // Header
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.white, boxShadow: [
-                BoxShadow(color: Colors.black12, blurRadius: 4),
-              ]),
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Back button
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Color(0xFF8C5D2D), // amber-800
+                        color: const Color(0xFF8C5D2D), // amber-800
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
+                      child: const Text(
                         "Back",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
-
                   Row(
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(50),
                         child: Image.network(
-                          'https://via.placeholder.com/40', // store image placeholder
+                          'https://via.placeholder.com/40', // Ganti dengan URL gambar toko
                           width: 32,
                           height: 32,
                           fit: BoxFit.cover,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text(
                         custName ?? storeName,
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.grey[800]),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(width: 48), // spacing dummy, sesuai template
+                  const SizedBox(width: 48), // Dummy spacing
                 ],
               ),
             ),
@@ -133,28 +139,28 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             // Message List
             Expanded(
               child: Container(
-                color: Color(0xFFf3f3f3), // bg-gray-100
+                color: const Color(0xFFf3f3f3), // bg-gray-100
                 child: _loading
-                    ? Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
-                        padding: EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final msg = _messages[index];
-                          bool senderIsUser = true; // Atur sesuai logic auth
+                          const senderIsUser = true; // Atur sesuai logika autentikasi
                           return GestureDetector(
-                            onLongPress: () {
-                              // Edit message modal
-                              showEditModal(msg.id, msg.content);
-                            },
+                            onLongPress: () => showEditModal(msg.id, msg.content),
                             child: Container(
-                              margin: EdgeInsets.symmetric(vertical: 4),
+                              margin: const EdgeInsets.symmetric(vertical: 4),
                               alignment: senderIsUser ? Alignment.centerRight : Alignment.centerLeft,
                               child: Container(
-                                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-                                padding: EdgeInsets.all(8),
+                                constraints: BoxConstraints(
+                                    maxWidth: MediaQuery.of(context).size.width * 0.7),
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: senderIsUser ? Color(0xFFC6AC8F) : Color(0xFFEAE0D5),
+                                  color: senderIsUser
+                                      ? const Color(0xFFC6AC8F)
+                                      : const Color(0xFFEAE0D5),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -172,41 +178,41 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               ),
             ),
 
-            // Input message form
+            // Input Message Form
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border(top: BorderSide(color: Colors.grey[300]!)),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _controller,
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                       decoration: InputDecoration(
                         hintText: "Type a message",
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       ),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   GestureDetector(
                     onTap: sendMessage,
                     child: Container(
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Color(0xFFC6AC8F),
+                        color: const Color(0xFFC6AC8F),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Icon(Icons.send, color: Colors.white, size: 20),
+                      child: const Icon(Icons.send, color: Colors.white, size: 20),
                     ),
                   )
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
