@@ -22,6 +22,10 @@ class StorePageState extends State<StorePage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Store Page"),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
           bottom: TabBar(
             indicatorSize: TabBarIndicatorSize.label,
             labelColor: Colors.purple,
@@ -38,7 +42,7 @@ class StorePageState extends State<StorePage> {
             },
           ),
         ),
-        drawer: const NavBar(),
+        // drawer: const Navbar(),
         body: Column(
           children: [
             if (_selectedIndex == 0 || _selectedIndex == 1)

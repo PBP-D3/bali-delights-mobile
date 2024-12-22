@@ -1,6 +1,5 @@
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../models/chat.dart';
-import '../models/message.dart';
 import 'package:bali_delights_mobile/constants.dart';
 
 class ApiService {
@@ -36,18 +35,17 @@ class ApiService {
   static Future<Map<String, dynamic>> createChat(
       CookieRequest request, int storeId) async {
     print('Creating chat with store ID: $storeId'); // Debug log
-    
+
     final response = await request.post(
-      '${Constants.baseUrl}/chats/api/chats/create/',
-      {'store_id': storeId.toString()}
-    );
-    
+        '${Constants.baseUrl}/chats/api/chats/create/',
+        {'store_id': storeId.toString()});
+
     print('Create chat response: $response'); // Debug log
-    
+
     if (response != null) {
       return {
         'success': true,
-        'chat_id': response['chat_id'],  // Changed from store_id to chat_id
+        'chat_id': response['chat_id'], // Changed from store_id to chat_id
         'store_id': storeId,
       };
     } else {
@@ -61,15 +59,12 @@ class ApiService {
         .get('${Constants.baseUrl}/chats/api/chats/$storeId/view/');
 
     if (response != null) {
-      final userId = response['user']?['id'];
-      final messages = response['messages'] as List<dynamic>;
-      
       return {
         'success': true,
         'chat_id': response['chat_id'],
         'store': response['store'],
         'user': response['user'],
-        'messages': messages,
+        'messages': response['messages']
       };
     } else {
       throw Exception('Failed to initialize chat');
