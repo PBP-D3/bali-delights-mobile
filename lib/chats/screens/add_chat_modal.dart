@@ -1,71 +1,104 @@
 import 'package:flutter/material.dart';
+import 'package:bali_delights_mobile/store/model/store.dart';
 
 class AddChatModal extends StatefulWidget {
   final Function(int storeId) onChatCreated;
+  final List<Store> stores;
 
-  AddChatModal({required this.onChatCreated});
+  const AddChatModal({
+    required this.onChatCreated, 
+    required this.stores,
+    Key? key
+  }) : super(key: key);
 
   @override
   _AddChatModalState createState() => _AddChatModalState();
 }
 
 class _AddChatModalState extends State<AddChatModal> {
-  TextEditingController _searchCtrl = TextEditingController();
-  List<Map<String, dynamic>> _stores = [
-    {"id": 1, "name": "Store A"},
-    {"id": 2, "name": "Store B"},
-  ];
+  final TextEditingController _searchCtrl = TextEditingController();
+  List<Store> _filteredStores = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredStores = widget.stores;
+  }
+
+  void _filterStores(String query) {
+    setState(() {
+      _filteredStores = widget.stores.where((store) {
+        return store.fields.name.toLowerCase().contains(query.toLowerCase());
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: EdgeInsets.all(0),
+      contentPadding: const EdgeInsets.all(0),
       content: Container(
         width: 400,
         child: Stack(
           children: [
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("Start a Chat!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey[800])),
-                  SizedBox(height: 16),
+                  const Text(
+                    "Start a Chat!",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: _searchCtrl,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: "Search stores",
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: (val) {
-                      // Implementasi pencarian store
-                    },
+                    onChanged: _filterStores,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Container(
                     height: 200,
-                    child: ListView.builder(
-                      itemCount: _stores.length,
-                      itemBuilder: (context, index) {
-                        final store = _stores[index];
-                        return GestureDetector(
-                          onTap: () {
-                            // Buat chat dengan store ini
-                            widget.onChatCreated(store["id"]);
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            margin: EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(store["name"]),
+                    child: _filteredStores.isEmpty
+                        ? const Center(child: Text("No stores found."))
+                        : ListView.builder(
+                            itemCount: _filteredStores.length,
+                            itemBuilder: (context, index) {
+                              final store = _filteredStores[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  widget.onChatCreated(store.pk);
+                                  Navigator.pop(context);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundImage: NetworkImage(
+                                          store.fields.getImage(),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(store.fields.name),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ],
               ),
@@ -78,12 +111,15 @@ class _AddChatModalState extends State<AddChatModal> {
                 child: Container(
                   width: 32,
                   height: 32,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Color(0xFFC6AC8F),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
-                  child: Text("✕", style: TextStyle(fontSize: 16, color: Colors.black)),
+                  child: const Text(
+                    "✕",
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                  ),
                 ),
               ),
             ),

@@ -1,22 +1,24 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../api_service.dart';
-import '../models/message.dart';
+import 'package:provider/provider.dart';
+import 'package:bali_delights_mobile/constants.dart';
+import 'package:bali_delights_mobile/chats/models/message.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'edit_message_modal.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final int chatId;
 
-  ChatDetailScreen({required this.chatId});
+  const ChatDetailScreen({required this.chatId, Key? key}) : super(key: key);
 
   @override
   _ChatDetailScreenState createState() => _ChatDetailScreenState();
 }
 
 class _ChatDetailScreenState extends State<ChatDetailScreen> {
+  final TextEditingController _controller = TextEditingController();
   List<Message> _messages = [];
   bool _loading = true;
-  TextEditingController _controller = TextEditingController();
-  int? currentMessageId;
 
   @override
   void initState() {
@@ -25,17 +27,24 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   }
 
   Future<void> loadMessages() async {
+    setState(() {
+      _loading = true;
+    });
+    final request = context.watch<CookieRequest>();
     try {
-      final msgs = await ApiService.fetchMessages(widget.chatId);
+      final response = await request
+          .get('${Constants.baseUrl}/api/chats/${widget.chatId}/messages/');
       setState(() {
-        _messages = msgs;
-        _loading = false;
+        _messages = (response['messages'] as List)
+            .map((json) => Message.fromJson(json))
+            .toList();
       });
     } catch (e) {
+      debugPrint('Error loading messages: $e');
+    } finally {
       setState(() {
         _loading = false;
       });
-      print('Error loading messages: $e');
     }
   }
 
@@ -43,12 +52,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    final success = await ApiService.sendMessage(widget.chatId, text);
-    if (success) {
-      _controller.clear();
-      loadMessages();
-    } else {
-      print('Failed to send message');
+    final request = context.watch<CookieRequest>();
+    try {
+      final response = await request
+          .post('${Constants.baseUrl}/api/chats/${widget.chatId}/send/', {
+        'message': text,
+      });
+      if (response['success']) {
+        _controller.clear();
+        loadMessages();
+      } else {
+        debugPrint('Failed to send message');
+      }
+    } catch (e) {
+      debugPrint('Error sending message: $e');
     }
   }
 
@@ -56,15 +73,24 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => EditMessageModal(
+        messageId: messageId,
         initialContent: currentContent,
         onSave: (updatedContent) async {
-          // Panggil endpoint edit message di sini
-          // Karena kita belum buat endpoint edit disini, asumsikan sukses
-          // Untuk implementasi sebenarnya, gunakan ApiService serupa sendMessage.
-          // Setelah sukses, refresh messages:
-          // await ApiService.editMessage(messageId, updatedContent);
-          Navigator.pop(ctx);
-          loadMessages();
+          final request = context.watch<CookieRequest>();
+          try {
+            final response = await request
+                .post('${Constants.baseUrl}/api/messages/$messageId/edit/', {
+              'content': updatedContent,
+            });
+            if (response['success']) {
+              Navigator.pop(ctx);
+              loadMessages();
+            } else {
+              debugPrint('Failed to edit message');
+            }
+          } catch (e) {
+            debugPrint('Error editing message: $e');
+          }
         },
       ),
     );
@@ -72,64 +98,60 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Beberapa variabel tiruan untuk meniru template:
-    String storeName = "StoreName"; // Ganti dengan data store sebenarnya
-    String? custName = null; // Jika null, pakai storeName
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header mirip chat_personal.html
+            // Header
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.white, boxShadow: [
-                BoxShadow(color: Colors.black12, blurRadius: 4),
-              ]),
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Back button
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Color(0xFF8C5D2D), // amber-800
+                        color: const Color(0xFF8C5D2D), // amber-800
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
+                      child: const Text(
                         "Back",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
-
                   Row(
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(50),
                         child: Image.network(
-                          'https://via.placeholder.com/40', // store image placeholder
+                          'https://via.placeholder.com/40', // Replace with actual store image URL
                           width: 32,
                           height: 32,
                           fit: BoxFit.cover,
                         ),
                       ),
-                      SizedBox(width: 8),
-                      Text(
-                        custName ?? storeName,
+                      const SizedBox(width: 8),
+                      const Text(
+                        "Store Name", // Replace with actual store name
                         style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[800]),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(width: 48), // spacing dummy, sesuai template
+                  const SizedBox(width: 48), // Dummy spacing
                 ],
               ),
             ),
@@ -137,22 +159,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             // Message List
             Expanded(
               child: Container(
-                color: Color(0xFFf3f3f3), // bg-gray-100
+                color: const Color(0xFFf3f3f3), // bg-gray-100
                 child: _loading
-                    ? Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator())
                     : ListView.builder(
-                        padding: EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final msg = _messages[index];
-                          bool senderIsUser = true; // Atur sesuai logic auth
+                          final senderIsUser = msg.senderIsUser;
                           return GestureDetector(
-                            onLongPress: () {
-                              // Edit message modal
-                              showEditModal(msg.id, msg.content);
-                            },
+                            onLongPress: () =>
+                                showEditModal(msg.id, msg.content),
                             child: Container(
-                              margin: EdgeInsets.symmetric(vertical: 4),
+                              margin: const EdgeInsets.symmetric(vertical: 4),
                               alignment: senderIsUser
                                   ? Alignment.centerRight
                                   : Alignment.centerLeft,
@@ -161,11 +181,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                                     maxWidth:
                                         MediaQuery.of(context).size.width *
                                             0.7),
-                                padding: EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: senderIsUser
-                                      ? Color(0xFFC6AC8F)
-                                      : Color(0xFFEAE0D5),
+                                      ? const Color(0xFFC6AC8F)
+                                      : const Color(0xFFEAE0D5),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -185,43 +205,44 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               ),
             ),
 
-            // Input message form
+            // Input Message Form
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border(top: BorderSide(color: Colors.grey[300]!)),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _controller,
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                       decoration: InputDecoration(
                         hintText: "Type a message",
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8)),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
                       ),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   GestureDetector(
                     onTap: sendMessage,
                     child: Container(
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Color(0xFFC6AC8F),
+                        color: const Color(0xFFC6AC8F),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Icon(Icons.send, color: Colors.white, size: 20),
+                      child:
+                          const Icon(Icons.send, color: Colors.white, size: 20),
                     ),
                   )
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -2,35 +2,33 @@ import 'message.dart';
 
 class Chat {
   final int id;
-  final int sender;
-  final String senderUsername;
-  final int store;
+  final int storeId;
   final String storeName;
-  final String createdAt;
-  final List<Message> messages;
+  final String senderUsername;
+  final String lastMessageTime;
+  final String lastMessageContent;
+  final String storePhotoUrl;
 
   Chat({
     required this.id,
-    required this.sender,
-    required this.senderUsername,
-    required this.store,
+    required this.storeId,
     required this.storeName,
-    required this.createdAt,
-    required this.messages,
+    required this.senderUsername,
+    required this.lastMessageTime,
+    required this.lastMessageContent,
+    required this.storePhotoUrl,
   });
 
   factory Chat.fromJson(Map<String, dynamic> json) {
-    List messagesJson = json['messages'] ?? [];
-    List<Message> msgList = messagesJson.map((m) => Message.fromJson(m)).toList();
-
+    final store = json['store'] ?? {};
     return Chat(
       id: json['id'],
-      sender: json['sender'],
-      senderUsername: json['sender_username'],
-      store: json['store'],
-      storeName: json['store_name'],
-      createdAt: json['created_at'],
-      messages: msgList,
+      storeId: store['id'] ?? 0,
+      storeName: store['name'] ?? '',
+      senderUsername: json['user']?['username'] ?? '',
+      lastMessageTime: json['last_message_time'] ?? '',
+      lastMessageContent: json['last_message_content'] ?? '',
+      storePhotoUrl: store['photo_url'] ?? '',
     );
   }
 }
