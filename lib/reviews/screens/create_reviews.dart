@@ -64,7 +64,7 @@ class _CreateReviewScreenState extends State<CreateReviewScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12.0,
                   vertical: 8.0,
                 ),
@@ -84,7 +84,7 @@ class _CreateReviewScreenState extends State<CreateReviewScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12.0,
                   vertical: 8.0,
                 ),
@@ -101,14 +101,14 @@ class _CreateReviewScreenState extends State<CreateReviewScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+             const  SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _submitReview();
                   }
                 },
-                child: Text('Submit'),
+                child: const Text('Submit'),
               ),
             ],
           ),

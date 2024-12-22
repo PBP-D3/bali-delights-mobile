@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:bali_delights_mobile/constants.dart';
 import 'package:bali_delights_mobile/chats/models/message.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../services/api_service.dart';
@@ -43,7 +42,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           await ApiService.getOrCreateChat(request, widget.storeId);
 
       if (chatResult['success']) {
-        final currentUserId = chatResult['user']?['id'];
+        // final currentUserId = chatResult['user']?['id'];
         setState(() {
           _chatId = chatResult['chat_id'];
           if (chatResult['messages'] != null) {

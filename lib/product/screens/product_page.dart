@@ -91,11 +91,11 @@ class _ProductPageState extends State<ProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Products'),
+        title: const Text('Products'),
         actions: [
           if (error != null || products.isEmpty)
             IconButton(
-              icon: Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh),
               onPressed: () {
                 final request = Provider.of<CookieRequest>(context, listen: false);
                 _loadProducts(request);
@@ -126,7 +126,7 @@ class _ProductPageState extends State<ProductPage> {
           ),
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : error != null
                     ? Center(
                         child: Padding(
@@ -134,13 +134,13 @@ class _ProductPageState extends State<ProductPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 'Error loading products',
                                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
-                              SizedBox(height: 8),
-                              Text(error!, style: TextStyle(color: Colors.red)),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 8),
+                              Text(error!, style: const TextStyle(color: Colors.red)),
+                              const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () {
                                   final request = Provider.of<CookieRequest>(context, listen: false);
@@ -153,11 +153,11 @@ class _ProductPageState extends State<ProductPage> {
                         ),
                       )
                     : products.isEmpty
-                        ? Center(child: Text('No products available'))
+                        ? const Center(child: Text('No products available'))
                         : Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: GridView.builder(
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 3,
                                 mainAxisSpacing: 8.0,
                                 crossAxisSpacing: 8.0,

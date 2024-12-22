@@ -1,5 +1,3 @@
-import 'message.dart';
-
 class Chat {
   final int id;
   final int storeId;

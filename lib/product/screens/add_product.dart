@@ -107,10 +107,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New Product'),
+        title: const Text('Add New Product'),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
@@ -118,38 +118,38 @@ class _AddProductScreenState extends State<AddProductScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Product Name'),
+                decoration: const InputDecoration(labelText: 'Product Name'),
                 validator: (value) => 
                   value?.isEmpty ?? true ? 'Please enter a name' : null,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Description'),
                 maxLines: 3,
                 validator: (value) => 
                   value?.isEmpty ?? true ? 'Please enter a description' : null,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _priceController,
-                decoration: InputDecoration(labelText: 'Price'),
+                decoration: const InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
                 validator: (value) => 
                   value?.isEmpty ?? true ? 'Please enter a price' : null,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _stockController,
-                decoration: InputDecoration(labelText: 'Stock'),
+                decoration: const InputDecoration(labelText: 'Stock'),
                 keyboardType: TextInputType.number,
                 validator: (value) => 
                   value?.isEmpty ?? true ? 'Please enter stock quantity' : null,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
-                decoration: InputDecoration(labelText: 'Category'),
+                decoration: const InputDecoration(labelText: 'Category'),
                 items: categories.map((String category) {
                   return DropdownMenuItem(
                     value: category,
@@ -162,11 +162,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 validator: (value) => 
                   value == null ? 'Please select a category' : null,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Image Option"),
+                  const Text("Image Option"),
                   Row(
                     children: [
                       Radio<String>(
@@ -181,7 +181,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           });
                         },
                       ),
-                      Text("Upload Image"),
+                      const Text("Upload Image"),
                       Radio<String>(
                         value: "url",
                         groupValue: _choice,
@@ -193,7 +193,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           });
                         },
                       ),
-                      Text("Image URL"),
+                     const  Text("Image URL"),
                     ],
                   ),
                 ],
@@ -201,11 +201,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
               if (_choice == "upload")
                 ElevatedButton(
                   onPressed: _pickImage,
-                  child: Text('Pick Image'),
+                  child: const Text('Pick Image'),
                 ),
               if (_choice == "upload" && (_imageFile != null || _webImage != null))
                 Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: kIsWeb
                       ? Image.memory(_webImage!, height: 200)
                       : Image.file(_imageFile!, height: 200),
@@ -226,12 +226,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   },
                   validator: (value) => null, // No validation for URL field
                 ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isUploading ? null : _addProduct,
                 child: _isUploading 
-                  ? CircularProgressIndicator() 
-                  : Text('Add Product'),
+                  ? const CircularProgressIndicator() 
+                  : const Text('Add Product'),
               ),
             ],
           ),

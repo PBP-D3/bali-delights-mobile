@@ -23,13 +23,15 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
 
   Future<List<Review>> fetchUserReviews() async {
     await _cookieRequest.init();
-    print(context.read<CookieRequest>().jsonData);
-    print('Fetching user reviews');
-    final response = await _cookieRequest.get('${Constants.baseUrl}/reviews/my-review/json');
-    print(response);
-    if (response is Map && response.containsKey('detail') && response['detail'] == 'Authentication credentials were not provided.') {
+
+    final response =
+        await _cookieRequest.get('${Constants.baseUrl}/reviews/my-review/json');
+
+    if (response is Map &&
+        response.containsKey('detail') &&
+        response['detail'] == 'Authentication credentials were not provided.') {
       // Handle not authenticated
-      print('User is not authenticated');
+
       return [];
     }
 
@@ -38,14 +40,15 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
   }
 
   Future<void> deleteReview(int reviewId) async {
-    final response = await _cookieRequest.post('${Constants.baseUrl}/reviews/delete-review/$reviewId/', {});
+    final response = await _cookieRequest
+        .post('${Constants.baseUrl}/reviews/delete-review/$reviewId/', {});
     if (response['success']) {
       setState(() {
         futureReviews = fetchUserReviews();
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to delete review'),
+        content: const Text('Failed to delete review'),
         backgroundColor: Colors.red,
       ));
     }
@@ -61,7 +64,7 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Reviews'),
+        title: const Text('My Reviews'),
       ),
       body: FutureBuilder<List<Review>>(
         future: futureReviews,
@@ -77,7 +80,8 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EditReviewScreen(review: snapshot.data![index]),
+                        builder: (context) =>
+                            EditReviewScreen(review: snapshot.data![index]),
                       ),
                     );
                     if (result == true) {
@@ -90,10 +94,9 @@ class _UserReviewScreenState extends State<UserReviewScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text("${snapshot.error}"));
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
   }
 }
-

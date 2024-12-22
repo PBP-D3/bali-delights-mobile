@@ -12,7 +12,7 @@ class ProductDetailPage extends StatelessWidget {
   void addToCart(BuildContext context, int productId, int stock) async {
     if (stock == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("This item is out of stock.")),
+        const SnackBar(content: Text("This item is out of stock.")),
       );
       return;
     }
@@ -54,20 +54,20 @@ class ProductDetailPage extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 product['name'],
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text('Price: \$${product['price']}'),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text('Stock: ${product['stock']}'),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text('Category: ${product['category']}'),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text('Description: ${product['description']}'),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -84,9 +84,9 @@ class ProductDetailPage extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
-                    child: Text('Check Reviews'),
+                    child: const Text('Check Reviews'),
                   ),
                   if (isAuthenticated)
                     ElevatedButton(
@@ -97,21 +97,21 @@ class ProductDetailPage extends StatelessWidget {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
-                      child: Text('Add to Cart'),
+                      child: const Text('Add to Cart'),
                     ),
                 ],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Center(
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey,
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
-                  child: Text('Back'),
+                  child: const Text('Back'),
                 ),
               ),
             ],
